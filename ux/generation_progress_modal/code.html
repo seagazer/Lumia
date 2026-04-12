@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container": "#1d2026",
+                    "surface-tint": "#cdbdff",
+                    "surface-variant": "#32353c",
+                    "on-primary-fixed-variant": "#4f00d0",
+                    "on-tertiary-fixed-variant": "#004f58",
+                    "tertiary-fixed": "#9cf0ff",
+                    "on-error-container": "#ffdad6",
+                    "surface-container-low": "#191c22",
+                    "tertiary-container": "#005d68",
+                    "background": "#10131a",
+                    "on-error": "#690005",
+                    "outline-variant": "#494456",
+                    "primary": "#cdbdff",
+                    "tertiary": "#00daf3",
+                    "on-primary-container": "#cebfff",
+                    "primary-fixed-dim": "#cdbdff",
+                    "on-secondary-fixed": "#180065",
+                    "on-tertiary-container": "#00dcf5",
+                    "on-surface": "#e1e2eb",
+                    "outline": "#948da2",
+                    "on-secondary-fixed-variant": "#4433a4",
+                    "on-surface-variant": "#cbc3d9",
+                    "inverse-on-surface": "#2e3037",
+                    "primary-fixed": "#e8deff",
+                    "primary-container": "#5d21df",
+                    "surface-bright": "#363940",
+                    "on-primary": "#370096",
+                    "surface-container-highest": "#32353c",
+                    "inverse-primary": "#6833ea",
+                    "error-container": "#93000a",
+                    "secondary-fixed-dim": "#c7bfff",
+                    "on-tertiary-fixed": "#001f24",
+                    "surface-container-high": "#272a31",
+                    "on-secondary": "#2c148e",
+                    "error": "#ffb4ab",
+                    "on-background": "#e1e2eb",
+                    "secondary-fixed": "#e5deff",
+                    "on-tertiary": "#00363d",
+                    "secondary-container": "#4635a7",
+                    "secondary": "#c7bfff",
+                    "surface-container-lowest": "#0b0e14",
+                    "surface": "#10131a",
+                    "inverse-surface": "#e1e2eb",
+                    "on-primary-fixed": "#20005f",
+                    "on-secondary-container": "#b8afff",
+                    "tertiary-fixed-dim": "#00daf3",
+                    "surface-dim": "#10131a"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Manrope"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glow-pulse {
+            box-shadow: 0 0 40px rgba(93, 33, 223, 0.3);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body text-on-surface selection:bg-primary/30 min-h-screen overflow-hidden">
+<!-- Top Navigation Bar -->
+<header class="bg-[#10131a]/60 backdrop-blur-2xl font-manrope font-bold tracking-tight text-on-surface docked full-width top-0 z-50 no-border tonal-transition bg-gradient-to-b from-[#10131a] to-transparent flat no-shadows flex justify-between items-center w-full px-6 h-16 fixed">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-indigo-400 dark:text-indigo-300" data-icon="auto_awesome">auto_awesome</span>
+<span class="text-xl font-black text-indigo-50 tracking-tighter">Lumia AI</span>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden md:flex gap-6 mr-6">
+<a class="text-indigo-200 font-semibold text-sm transition-opacity hover:opacity-80" href="#">Creation</a>
+<a class="text-slate-500 font-semibold text-sm transition-opacity hover:opacity-80" href="#">Gallery</a>
+<a class="text-slate-500 font-semibold text-sm transition-opacity hover:opacity-80" href="#">Settings</a>
+</div>
+<div class="w-8 h-8 rounded-full bg-surface-container-highest overflow-hidden active:scale-95 duration-200">
+<img alt="User profile photo" class="w-full h-full object-cover" data-alt="Close-up portrait of a professional man with clean lighting and a soft neutral studio background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBBmByLzE3iqnQDGkmzrRymWzxc9-z3RsRpFbEueyKW2H8nmxTf-UfMZPvd0_Ug-M95WjC9BGAHkrmEgFo0qpJ7KCRw55dQ_ihbqF0zXGnJrAz-hamOYuHtKIuF-jHuRprExdRmP9SZEkVbw6QPwgOed1qcMHCShvm-K_PPwJXziJqg-D2LwE0YF2OzJgGSFTKc3OaZDWjFPVAE4Ou6T_AFJRV_faeFyWPZm69soHXWbRPnbc3a524fcNC9JKoNSG2z6Nixl-vPQiuF"/>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas (Blurred background for Modal) -->
+<main class="pt-24 px-6 max-w-7xl mx-auto h-screen filter blur-sm">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 h-full">
+<!-- Left: Prompt Section -->
+<div class="space-y-8">
+<div class="space-y-2">
+<h1 class="text-4xl font-headline font-extrabold tracking-tight text-on-surface">Dreaming up <span class="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">new worlds.</span></h1>
+<p class="text-on-surface-variant max-w-md">Our neural engine is translating your thoughts into high-fidelity visuals.</p>
+</div>
+<div class="bg-surface-container-low p-6 rounded-xl space-y-4">
+<div class="h-4 w-32 bg-surface-container-high rounded-full"></div>
+<div class="space-y-2">
+<div class="h-3 w-full bg-surface-container-highest rounded-full"></div>
+<div class="h-3 w-5/6 bg-surface-container-highest rounded-full"></div>
+</div>
+</div>
+</div>
+<!-- Right: Result Grid Placeholder -->
+<div class="grid grid-cols-2 gap-4 h-3/4">
+<div class="bg-surface-container-low rounded-xl aspect-[4/5] overflow-hidden">
+<img class="w-full h-full object-cover opacity-50 grayscale" data-alt="Abstract flowing liquid patterns in deep indigo and vibrant cyan with soft light reflecting off smooth curves" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCrvVt_WcqCkfmLCe0dvVfYliwHfoYDcrUs6MzCCPa2nO0AOxF4wcF6ez5NvpPQrFon_qTw-MWDyvMEV-ESDzaFhLIWnBZRhcisK3PIkLbkjybSVtRWwBVV8KHIE58P571AUwUwZmM8IPRKPeDv8rAn1dzbovv9DHjKjNTeW8MvzTfV9cHqzSWPzy_f-kInS7MJAcAVwehFmuWzN4Ko3XJMJDSVFRpzyJdrgKi2XDkmEKRcenDVnjr50n5B7btMWl1LGeAM1qQtmeng"/>
+</div>
+<div class="bg-surface-container-low rounded-xl aspect-[4/5] overflow-hidden">
+<img class="w-full h-full object-cover opacity-50 grayscale" data-alt="Futuristic neon cityscape at night with glowing magenta and blue lights reflecting in wet pavement" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBQw_EPNdD5mShQYSUAaEWd0KrvBXPZiBwTq1_pOtyyiUU4Ns9wvojyydynTDNoBgDbkloOtpxs8Yyd_ARWIeFZRPRLedQjs8-F7JhX23cEOh2ShMOCYWi9BtQf32InHmLlCoHjs1iRNqrtiwkZp7FH_T9uCdX4xFh8OvzEmCvK4Hin996rqYPZYjvPBFxtJfVb63KIFWza4b8fNFUQGiRbic8ZT6HDPw0yAUlUgjn5HxyDohGwHBJbOQNQrZpMhyXQpqPYjgc9HKxA"/>
+</div>
+</div>
+</div>
+</main>
+<!-- Modal Overlay -->
+<div class="fixed inset-0 z-[60] flex items-center justify-center bg-background/40 backdrop-blur-md">
+<!-- Progress Modal -->
+<div class="w-full max-w-md bg-surface-variant/50 backdrop-blur-3xl p-12 rounded-[2.5rem] shadow-[0_0_80px_rgba(55,0,150,0.15)] flex flex-col items-center text-center relative overflow-hidden">
+<!-- Decorative Glow Background -->
+<div class="absolute -top-24 -left-24 w-64 h-64 bg-primary/20 blur-[100px] rounded-full"></div>
+<div class="absolute -bottom-24 -right-24 w-64 h-64 bg-tertiary/10 blur-[100px] rounded-full"></div>
+<!-- Luminous Loader Component -->
+<div class="relative w-32 h-32 mb-10">
+<!-- Rotating Gradient Ring -->
+<div class="absolute inset-0 rounded-full border-4 border-surface-container-highest"></div>
+<div class="absolute inset-0 rounded-full border-t-4 border-l-4 border-primary glow-pulse animate-spin duration-[2000ms]"></div>
+<!-- Inner Pulse -->
+<div class="absolute inset-4 rounded-full bg-gradient-to-br from-primary-container to-primary/40 flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary-container text-4xl animate-pulse" data-icon="magic_button" style="font-variation-settings: 'FILL' 1;">magic_button</span>
+</div>
+</div>
+<!-- Modal Content -->
+<div class="space-y-2 mb-10 relative z-10">
+<h2 class="text-2xl font-headline font-extrabold tracking-tight text-indigo-50">Lumia is dreaming up your image...</h2>
+<p class="text-on-surface-variant text-sm font-medium tracking-wide">ESTIMATED TIME: 12 SECONDS</p>
+</div>
+<!-- Action Button -->
+<button class="px-8 py-3 bg-surface-container-highest hover:bg-surface-bright text-on-surface font-semibold rounded-xl transition-all duration-300 active:scale-95 border border-outline-variant/10 relative z-10">
+                Cancel
+            </button>
+<!-- Progress Bar Subtle -->
+<div class="absolute bottom-0 left-0 w-full h-1 bg-surface-container-high overflow-hidden">
+<div class="h-full bg-gradient-to-r from-primary to-tertiary w-1/3 animate-[progress_3s_infinite_linear]"></div>
+</div>
+</div>
+</div>
+<!-- Bottom Navigation Bar (Mobile) -->
+<nav class="md:hidden bg-[#10131a]/80 backdrop-blur-3xl fixed bottom-0 w-full z-50 rounded-t-[1.5rem] no-border shadow-[0_-1px_0_0_rgba(255,255,255,0.05)] shadow-[0_-10px_40px_rgba(55,0,150,0.12)]">
+<div class="flex justify-around items-center w-full px-4 pt-3 pb-8">
+<a class="flex flex-col items-center justify-center text-[#00daf3] drop-shadow-[0_0_10px_rgba(0,218,243,0.4)] transition-all duration-300" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="magic_button" style="font-variation-settings: 'FILL' 1;">magic_button</span>
+<span class="font-inter text-[10px] font-semibold uppercase tracking-[0.05em]">Creation</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 hover:text-indigo-200 transition-all duration-300" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="grid_view">grid_view</span>
+<span class="font-inter text-[10px] font-semibold uppercase tracking-[0.05em]">Gallery</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 hover:text-indigo-200 transition-all duration-300" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="settings">settings</span>
+<span class="font-inter text-[10px] font-semibold uppercase tracking-[0.05em]">Settings</span>
+</a>
+</div>
+</nav>
+<style>
+        @keyframes progress {
+            from { transform: translateX(-100%); }
+            to { transform: translateX(300%); }
+        }
+    </style>
+</body></html>

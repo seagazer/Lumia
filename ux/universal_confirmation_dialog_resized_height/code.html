@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Lumia AI - Gallery Detail</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Manrope:wght@500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container": "#1d2026",
+                    "surface-tint": "#cdbdff",
+                    "surface-variant": "#32353c",
+                    "on-primary-fixed-variant": "#4f00d0",
+                    "on-tertiary-fixed-variant": "#004f58",
+                    "tertiary-fixed": "#9cf0ff",
+                    "on-error-container": "#ffdad6",
+                    "surface-container-low": "#191c22",
+                    "tertiary-container": "#005d68",
+                    "background": "#10131a",
+                    "on-error": "#690005",
+                    "outline-variant": "#494456",
+                    "primary": "#cdbdff",
+                    "tertiary": "#00daf3",
+                    "on-primary-container": "#cebfff",
+                    "primary-fixed-dim": "#cdbdff",
+                    "on-secondary-fixed": "#180065",
+                    "on-tertiary-fixed-variant": "#4433a4",
+                    "on-surface": "#e1e2eb",
+                    "outline": "#948da2",
+                    "on-secondary-fixed-variant": "#4433a4",
+                    "on-surface-variant": "#cbc3d9",
+                    "inverse-on-surface": "#2e3037",
+                    "primary-fixed": "#e8deff",
+                    "primary-container": "#5d21df",
+                    "surface-bright": "#363940",
+                    "on-primary": "#370096",
+                    "surface-container-highest": "#32353c",
+                    "inverse-primary": "#6833ea",
+                    "error-container": "#93000a",
+                    "secondary-fixed-dim": "#c7bfff",
+                    "on-tertiary-fixed": "#001f24",
+                    "surface-container-high": "#272a31",
+                    "on-secondary": "#2c148e",
+                    "error": "#ffb4ab",
+                    "on-background": "#e1e2eb",
+                    "secondary-fixed": "#e5deff",
+                    "on-tertiary": "#00363d",
+                    "secondary-container": "#4635a7",
+                    "secondary": "#c7bfff",
+                    "surface-container-lowest": "#0b0e14",
+                    "surface": "#10131a",
+                    "inverse-surface": "#e1e2eb",
+                    "on-primary-fixed": "#20005f",
+                    "on-secondary-container": "#b8afff",
+                    "tertiary-fixed-dim": "#00daf3",
+                    "surface-dim": "#10131a"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Manrope"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .tonal-transition {
+            background: linear-gradient(to bottom, #10131a 0%, rgba(16, 19, 26, 0.8) 50%, transparent 100%);
+        }
+        .glass-card {
+            background: rgba(50, 53, 60, 0.4);
+            backdrop-filter: blur(24px);
+        }
+        .glass-effect {
+            background: rgba(29, 32, 38, 0.65);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+        }
+        body {
+            height: 884px;
+            overflow: hidden;
+            position: relative;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body selection:bg-primary/30">
+<!-- TopAppBar -->
+<header class="fixed top-0 z-50 w-full bg-[#10131a]/60 backdrop-blur-2xl flex justify-between items-center px-6 h-16 tonal-transition">
+<div class="flex items-center gap-3">
+<button class="text-on-surface hover:opacity-80 transition-opacity active:scale-95 duration-200">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<div class="text-xl font-black text-indigo-50 tracking-tighter font-headline">Lumia AI</div>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-indigo-400">auto_awesome</span>
+<div class="w-8 h-8 rounded-full overflow-hidden ring-2 ring-primary/20">
+<img alt="User profile photo" class="w-full h-full object-cover" data-alt="close-up portrait of a man with friendly expression against a soft studio background with blue and violet lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC-M2v2-C-WTIAqj2pQqTrSNHTMRvkCBPAwygOomBeXmITvxTSW_cpP9A4fRgtgij1Sw9kYe_--c3Q0mmlEFy_LPhuEy7zFwI6szPi0qBmMtxBuMMJeRXeGErQ1SeQdf5ksAWgiNYdaOqLVAQu8_fc931YsLmyZszKmhWhTKg3ufCPLgazhGoPW6F8wRJSLhxy4x9EogMhwryi08dsZb-k9XPok2ddy6-uGwy7lH_DeKqXmvAHKzSPxLN27WDVr-kFgsd0kWbHfd3kQ"/>
+</div>
+</div>
+</header>
+<main class="pt-16 pb-32 max-w-4xl mx-auto px-4 md:px-0 h-full overflow-y-auto">
+<!-- Image Preview Section -->
+<section class="mt-4 rounded-xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] bg-surface-container-lowest">
+<img alt="Generated preview" class="w-full aspect-square md:aspect-video object-cover" data-alt="abstract flowing digital art with swirling ribbons of neon cyan and deep violet light against a dark velvet background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC7QwXqx9Z9gpqJrTMgHRfPmG9D6BWT6vl6r4xx_xxmHWcpy1oeRjMOpWVIo8jFaS3tJrTLQy3PqfSBMn7yD173LkwH2d5ogXmochpkTNKujXfjg-l0w056WHzaxIgutZTxgVURwI0kw09lpBzYy6VaputBKoMBUy25sQH0OgE7bBURFB7Gwd6yinLcLZIPlyD65DDWZ2vmcqn26J28nc3KNx1PBg1TfZdOfKaP9GjR29fnX1K4-LC-FT4CgcoHzmNTxSx1KzUEqxgD"/>
+</section>
+<!-- Metadata Section -->
+<section class="mt-8 space-y-6">
+<div class="flex flex-wrap gap-4 items-center justify-between">
+<h1 class="font-headline font-extrabold text-3xl md:text-4xl text-indigo-50 tracking-tight">Cyber-Organic Synthesis</h1>
+<div class="flex gap-2">
+<span class="px-4 py-1.5 rounded-full bg-surface-container-high text-on-surface-variant text-xs font-semibold uppercase tracking-wider">Concept Art</span>
+<span class="px-4 py-1.5 rounded-full bg-tertiary-container/30 text-tertiary text-xs font-semibold uppercase tracking-wider">AI Generated</span>
+</div>
+</div>
+<!-- Bento Metadata Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<div class="glass-card p-6 rounded-xl flex flex-col gap-2">
+<span class="text-slate-500 font-label text-xs font-semibold uppercase tracking-[0.05em]">Date generated</span>
+<span class="text-on-surface font-medium text-lg">2024-05-20</span>
+</div>
+<div class="glass-card p-6 rounded-xl flex flex-col gap-2">
+<span class="text-slate-500 font-label text-xs font-semibold uppercase tracking-[0.05em]">Resolution</span>
+<span class="text-on-surface font-medium text-lg">1024x1024</span>
+</div>
+<div class="glass-card p-6 rounded-xl flex flex-col gap-2">
+<span class="text-slate-500 font-label text-xs font-semibold uppercase tracking-[0.05em]">Aspect Ratio</span>
+<span class="text-on-surface font-medium text-lg">1:1 Square</span>
+</div>
+</div>
+<!-- Prompt Card -->
+<div class="glass-card p-8 rounded-xl relative overflow-hidden">
+<div class="absolute top-0 right-0 p-4 opacity-10">
+<span class="material-symbols-outlined text-6xl">format_quote</span>
+</div>
+<span class="text-slate-500 font-label text-xs font-semibold uppercase tracking-[0.05em] block mb-4">Generation Prompt</span>
+<p class="text-indigo-100 text-lg leading-relaxed font-light italic">
+                    "A surreal landscape where organic flora meets bioluminescent technology, deep indigo atmosphere with floating cyan spores, volumetric lighting, high fashion photography aesthetic, ultra detailed, 8k"
+                </p>
+<div class="mt-6 flex gap-4">
+<button class="flex items-center gap-2 text-primary hover:opacity-80 transition-opacity">
+<span class="material-symbols-outlined text-sm">content_copy</span>
+<span class="text-xs font-bold uppercase tracking-widest">Copy Prompt</span>
+</button>
+<button class="flex items-center gap-2 text-primary hover:opacity-80 transition-opacity">
+<span class="material-symbols-outlined text-sm">refresh</span>
+<span class="text-xs font-bold uppercase tracking-widest">Remix</span>
+</button>
+</div>
+</div>
+<!-- Action Area -->
+<div class="flex items-center justify-end pt-8">
+<button class="group flex items-center gap-3 px-8 py-4 rounded-xl bg-error-container/20 text-error hover:bg-error-container/40 transition-all duration-300 active:scale-95">
+<span class="material-symbols-outlined">delete</span>
+<span class="font-bold uppercase tracking-widest text-sm">Delete from Gallery</span>
+</button>
+</div>
+</section>
+</main>
+<!-- Confirmation Overlay (Universal Dialog Style) -->
+<div class="absolute inset-0 z-[100] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm">
+<div class="w-full max-w-sm glass-effect rounded-[2rem] p-8 shadow-[0_20px_80px_rgba(0,0,0,0.5)] border border-white/10 flex flex-col items-center">
+<div class="w-16 h-16 rounded-full bg-error-container/30 flex items-center justify-center text-error mb-6 shadow-[0_0_20px_rgba(147,0,10,0.2)]">
+<span class="material-symbols-outlined text-3xl">warning</span>
+</div>
+<h2 class="font-headline font-extrabold text-2xl text-center text-on-surface mb-2 tracking-tight">Confirm Deletion</h2>
+<p class="text-on-surface-variant text-center mb-8 leading-relaxed text-sm font-medium">
+                This action is permanent. "Cyber-Organic Synthesis" will be removed from your gallery and cannot be recovered.
+            </p>
+<div class="w-full flex flex-col gap-3">
+<button class="w-full py-4 rounded-xl bg-gradient-to-br from-error-container to-error text-on-error-container font-headline font-bold uppercase tracking-widest text-xs shadow-lg shadow-error/20 active:scale-[0.98] transition-transform">
+                    Permanently Delete
+                </button>
+<button class="w-full py-4 rounded-xl bg-surface-container-highest/60 text-on-surface font-headline font-bold uppercase tracking-widest text-xs hover:bg-surface-variant transition-colors active:scale-[0.98]">
+                    Keep Image
+                </button>
+</div>
+</div>
+</div>
+</body></html>

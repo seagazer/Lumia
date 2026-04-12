@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Lumia AI - Gallery</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@600;700;800&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+                  "surface-container": "#1d2026",
+                  "surface-tint": "#cdbdff",
+                  "surface-variant": "#32353c",
+                  "on-primary-fixed-variant": "#4f00d0",
+                  "on-tertiary-fixed-variant": "#004f58",
+                  "tertiary-fixed": "#9cf0ff",
+                  "on-error-container": "#ffdad6",
+                  "surface-container-low": "#191c22",
+                  "tertiary-container": "#005d68",
+                  "background": "#10131a",
+                  "on-error": "#690005",
+                  "outline-variant": "#494456",
+                  "primary": "#cdbdff",
+                  "tertiary": "#00daf3",
+                  "on-primary-container": "#cebfff",
+                  "primary-fixed-dim": "#cdbdff",
+                  "on-secondary-fixed": "#180065",
+                  "on-tertiary-container": "#00dcf5",
+                  "on-surface": "#e1e2eb",
+                  "outline": "#948da2",
+                  "on-secondary-fixed-variant": "#4433a4",
+                  "on-surface-variant": "#cbc3d9",
+                  "inverse-on-surface": "#2e3037",
+                  "primary-fixed": "#e8deff",
+                  "primary-container": "#5d21df",
+                  "surface-bright": "#363940",
+                  "on-primary": "#370096",
+                  "surface-container-highest": "#32353c",
+                  "inverse-primary": "#6833ea",
+                  "error-container": "#93000a",
+                  "secondary-fixed-dim": "#c7bfff",
+                  "on-tertiary-fixed": "#001f24",
+                  "surface-container-high": "#272a31",
+                  "on-secondary": "#2c148e",
+                  "error": "#ffb4ab",
+                  "on-background": "#e1e2eb",
+                  "secondary-fixed": "#e5deff",
+                  "on-tertiary": "#00363d",
+                  "secondary-container": "#4635a7",
+                  "secondary": "#c7bfff",
+                  "surface-container-lowest": "#0b0e14",
+                  "surface": "#10131a",
+                  "inverse-surface": "#e1e2eb",
+                  "on-primary-fixed": "#20005f",
+                  "on-secondary-container": "#b8afff",
+                  "tertiary-fixed-dim": "#00daf3",
+                  "surface-dim": "#10131a"
+          },
+          "borderRadius": {
+                  "DEFAULT": "0.25rem",
+                  "lg": "0.5rem",
+                  "xl": "0.75rem",
+                  "full": "9999px"
+          },
+          "fontFamily": {
+                  "headline": ["Manrope"],
+                  "body": ["Inter"],
+                  "label": ["Inter"]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .glass-card {
+      background: rgba(50, 53, 60, 0.4);
+      backdrop-filter: blur(20px);
+    }
+    .hero-gradient {
+      background: linear-gradient(135deg, #5d21df 0%, #cdbdff 100%);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface font-body selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar Section -->
+<header class="fixed top-0 z-50 w-full bg-[#10131a]/60 backdrop-blur-2xl no-border tonal-transition bg-gradient-to-b from-[#10131a] to-transparent h-16 flex justify-between items-center px-6">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-indigo-400 dark:text-indigo-300" data-icon="auto_awesome">auto_awesome</span>
+<h1 class="text-xl font-black text-indigo-50 tracking-tighter font-headline">Lumia AI</h1>
+</div>
+<div class="hidden md:flex items-center gap-8 font-inter text-[10px] font-semibold uppercase tracking-[0.05em] text-slate-500">
+<a class="hover:text-indigo-200 transition-opacity" href="#">Creation</a>
+<a class="text-indigo-200" href="#">Gallery</a>
+<a class="hover:text-indigo-200 transition-opacity" href="#">Settings</a>
+</div>
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary-container/30 active:scale-95 duration-200 cursor-pointer">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="Stylized 3D avatar of a young creator with neon glasses and a futuristic hoodie on a dark violet background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_pTyrL1Ya9JL2ompB3VtzbtnOpgE5gWUThGqk5KiVfumOnf6J-Tp4B3E1DzS6aHoPx8UtnHEVMx0XLLOfEzhZHCW5_Okc7z6kUhCfg7ZUzHb0dRLo9X-wjSQLkeJj-w_zOI9iWATeCRtp3fOL7Qb_3NeR8X4qzyYnNSfAHlei-mLRa5_2_yY_TETEfD869CHegPMTLu_NBqXVoWtGUobWArmzgGz1_R-r_pXddMrBqvNrNyKxJixQ9wRBxSXXBl2ezb7jqorVvBzH"/>
+</div>
+</header>
+<main class="pt-24 pb-32 px-6 max-w-7xl mx-auto">
+<!-- Header Title Section -->
+<div class="mb-12">
+<h2 class="font-headline font-extrabold text-5xl md:text-7xl text-on-surface tracking-tighter mb-4">Gallery</h2>
+<div class="h-1 w-24 hero-gradient rounded-full"></div>
+</div>
+<!-- Stats and Filters (Bento Style Sub-header) -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-12">
+<div class="col-span-1 md:col-span-4 p-6 rounded-xl bg-surface-container-low flex items-center justify-between">
+<div>
+<p class="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-1">Total Artifacts</p>
+<p class="text-3xl font-headline font-bold">1,284</p>
+</div>
+<div class="w-12 h-12 rounded-lg bg-primary-container/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="grid_view">grid_view</span>
+</div>
+</div>
+<div class="relative group/dropdown">
+<button class="w-full p-6 rounded-xl bg-surface-container-low flex items-center justify-between cursor-pointer hover:bg-surface-container-high transition-colors glass-card border border-white/5">
+<div class="flex items-center">
+<span class="material-symbols-outlined text-on-surface-variant mr-2" data-icon="display_settings">display_settings</span>
+<span class="text-sm font-semibold text-on-surface">Resolution</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant transition-transform group-hover/dropdown:rotate-180" data-icon="expand_more">expand_more</span>
+</button>
+<!-- Dropdown Menu -->
+<div class="absolute left-0 top-full mt-2 w-full bg-surface-container-high/90 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden opacity-0 invisible group-hover/dropdown:opacity-100 group-hover/dropdown:visible transition-all duration-200 z-50 shadow-2xl">
+<div class="p-2">
+<a class="flex items-center px-4 py-3 text-sm font-medium text-on-surface hover:bg-primary/20 rounded-lg transition-colors" href="#">
+<span class="w-2 h-2 rounded-full bg-primary/40 mr-3"></span>
+        1024x1024
+      </a>
+<a class="flex items-center px-4 py-3 text-sm font-medium text-on-surface hover:bg-primary/20 rounded-lg transition-colors" href="#">
+<span class="w-2 h-2 rounded-full bg-primary/40 mr-3"></span>
+        2048x2560
+      </a>
+<a class="flex items-center px-4 py-3 text-sm font-medium text-on-surface hover:bg-primary/20 rounded-lg transition-colors" href="#">
+<span class="w-2 h-2 rounded-full bg-primary/40 mr-3"></span>
+        Standard
+      </a>
+<a class="flex items-center px-4 py-3 text-sm font-medium text-on-surface hover:bg-primary/20 rounded-lg transition-colors" href="#">
+<span class="w-2 h-2 rounded-full bg-primary/40 mr-3"></span>
+        High Definition
+      </a>
+</div>
+</div>
+</div>
+</div>
+<!-- Responsive Image Grid -->
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+<!-- Gallery Card 1 -->
+<div class="group relative aspect-[3/4] rounded-xl overflow-hidden cursor-pointer active:scale-95 duration-200 shadow-[0_10px_30px_rgba(0,0,0,0.3)]">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="Abstract 3D digital art featuring fluid iridescent shapes in deep violets and glowing cyans with soft volumetric lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAF8e4I8kf_08GDeFfUQro6wCoZiRvG5pfW45nH4fX3HU9UkEg1pDFP79Fugvf3hIxX2MmkusAXfUF1QQKq06bP2BfuAdYkQO6gcYRfOZE8fStG_tuhCZA3HnUZREJvPxlvkxeOaUzP494kUI5I6y8ZqYnXcpvw3Roj5lPEQBCO3iKZgEmzhsgxyIB2P5tHMgvjrMwawGguHON3LPlEryYh71BxEsxw4dwu-x9kee5ULGnI7T_Y8MGoZDNE0CH3FR9Ij_Kk2xsMDqcc"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-4 flex flex-col justify-end">
+<p class="font-headline font-bold text-sm text-on-surface truncate">Ethereal Currents</p>
+<div class="flex items-center mt-1">
+<span class="material-symbols-outlined text-[14px] text-tertiary mr-1" data-icon="bolt">bolt</span>
+<span class="text-[10px] text-on-surface-variant uppercase font-bold tracking-wider">Dreamscape v4</span>
+</div>
+</div>
+</div>
+<!-- Gallery Card 2 -->
+<div class="group relative aspect-[3/4] rounded-xl overflow-hidden cursor-pointer active:scale-95 duration-200 shadow-[0_10px_30px_rgba(0,0,0,0.3)]">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="Hyper-realistic portrait of a cyberpunk cyborg with glowing neon blue internal circuitry and intricate metallic textures on a dark smoky background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDa-Ga7-FO4UCpHMEbYLSHsy-UIZIeLu3r45xf-lRB-IoTz_24fMvTQ9b6jTirY6lsMsGHPI7cQuSGDQxAqqE8Z4XPXxNuMwcN-rdjvNqvDK12l-aPzz0tovWr6_M6xOQrOvDfU_1GEnul-703KzmJ3o1AGqhY8aZQ6OVd7mfHukSn3vpmX4egsnLyOtT5PtFhFmRKKrEKFpuk1SMOG8LSa7Hl28ei4kpz-fWAkI51Z1_u4hWkO67NtbllsARWCE1L8qmlyBUAnPv_3"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-4 flex flex-col justify-end">
+<p class="font-headline font-bold text-sm text-on-surface truncate">Neural Nexus</p>
+<div class="flex items-center mt-1">
+<span class="material-symbols-outlined text-[14px] text-tertiary mr-1" data-icon="auto_fix">auto_fix</span>
+<span class="text-[10px] text-on-surface-variant uppercase font-bold tracking-wider">Portrait Master</span>
+</div>
+</div>
+</div>
+<!-- Gallery Card 3 -->
+<div class="group relative aspect-[3/4] rounded-xl overflow-hidden cursor-pointer active:scale-95 duration-200 shadow-[0_10px_30px_rgba(0,0,0,0.3)]">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="A futuristic solarpunk city landscape at sunset with lush green vertical gardens, white curved skyscrapers, and golden light rays" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAhd83GxePpxtuwfG3RAGRUWKLo-RU7f46lC4awEQpF4dDv9lnf3Ho3rZMWQqA_Hh_QvgrX0xqGhn6yVunKXQCUpzjtDMB0jmSouSDBanTPw2S2k-aQddSlzTLLCk1gHVjGXxRMa9qwOla3ep94J_nm4Fm7s2UyRPfWB552SI--52JaZqZ_LAutB-T3Ix3AYB0W9sWLNjAq6VlYagu5kVtDiKzKy0XNvTJNjbOfLWlkU2L0KZGzBfc0aFii7CUSfRWHrE4JC_tb1kDK"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-4 flex flex-col justify-end">
+<p class="font-headline font-bold text-sm text-on-surface truncate">Verdant Utopia</p>
+<div class="flex items-center mt-1">
+<span class="material-symbols-outlined text-[14px] text-tertiary mr-1" data-icon="landscape">landscape</span>
+<span class="text-[10px] text-on-surface-variant uppercase font-bold tracking-wider">Cinematic World</span>
+</div>
+</div>
+</div>
+<!-- Gallery Card 4 -->
+<div class="group relative aspect-[3/4] rounded-xl overflow-hidden cursor-pointer active:scale-95 duration-200 shadow-[0_10px_30px_rgba(0,0,0,0.3)]">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="Close-up of a digital crystalline structure growing with glowing pink and violet particles in a dark void" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDNCrPiPHBSfIgdmidxN-tOY6DGMo569kq9lCaqxbAFbc9nGWfyIqwLU24gAj2Y9rq5mOp7otDZaFz5ZcjG9Dc6DTPoZR5w2j9t2watSKlgy_OldkWF56cINhVqzEZzNDP7Q-J-b0fjYPWXDn1iDMM3AXqLI_Yx6ltZMqj6tHXtX6hQjC8wafYeQPKEUPxLKBlaguYa6je8nFZewhah7C5uDZO8DkWbJNn44Q_nA74JIisI-3B3GTkJ2P9IiVf4dEaOA_pi4qTxTcug"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-4 flex flex-col justify-end">
+<p class="font-headline font-bold text-sm text-on-surface truncate">Amethyst Core</p>
+<div class="flex items-center mt-1">
+<span class="material-symbols-outlined text-[14px] text-tertiary mr-1" data-icon="diamond">diamond</span>
+<span class="text-[10px] text-on-surface-variant uppercase font-bold tracking-wider">Macro Detail</span>
+</div>
+</div>
+</div>
+<!-- Gallery Card 5 -->
+<div class="group relative aspect-[3/4] rounded-xl overflow-hidden cursor-pointer active:scale-95 duration-200 shadow-[0_10px_30px_rgba(0,0,0,0.3)]">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="Vibrant cosmic nebula with swirling clouds of magenta and orange gas and sparkling white stars in a deep black space" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBELAYQylwFd-y2QfoijiV6ecbZDD9hYQxaHlpxnRmsdlpwmUpsOvfDczNVMIgxJ4ye-ZThMX6aYIRUXFZgNpXR2hkD6c1ImVFnHIiv3RthLsxLZk5Pv95scH_YU913L6ooM6-ocz2X_W7notEzWYxq1glGRgM2jsLxv9ednV27lgJK7M1G3l0NKx3FAYELzGRCz6srqaBwRlLdaXKY4WiCw8Lwf2NW-sluxfHuUIaQcY6Lnz-ajvGuI3pfD0fBKLSu7gPRuRkmQshL"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-4 flex flex-col justify-end">
+<p class="font-headline font-bold text-sm text-on-surface truncate">Nebula Bloom</p>
+<div class="flex items-center mt-1">
+<span class="material-symbols-outlined text-[14px] text-tertiary mr-1" data-icon="rocket_launch">rocket_launch</span>
+<span class="text-[10px] text-on-surface-variant uppercase font-bold tracking-wider">Space Journey</span>
+</div>
+</div>
+</div>
+<!-- Gallery Card 6 -->
+<div class="group relative aspect-[3/4] rounded-xl overflow-hidden cursor-pointer active:scale-95 duration-200 shadow-[0_10px_30px_rgba(0,0,0,0.3)]">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="Minimalist architectural shot of a brutalist concrete building staircase with dramatic harsh shadows and a deep blue sky" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC3UKHy2bZfNg0B9p_WO1Xl1d5kjPoSSBHSbxibyjLS8JO7DqXhC7C1yIuuP_34chSlKaWCr8rwo5NkrAksBSLsrFYCWztnof3ltturUKyJeXeZPZamdS7qDP9-Bfye4C7ZQEtxZbvN88porPP_6qG82GtuyYwkyyXUlkAe_R2SDjTUptKTfX-aTQaQDsDO2zTVvM5lfDMSVGdEYB1udTKAYW6t0f6KKPdihkiljJH3HW6uEHsclXTclSc4-ywedaBiHRlfQA4K5y0Z"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-4 flex flex-col justify-end">
+<p class="font-headline font-bold text-sm text-on-surface truncate">Monolith Shadows</p>
+<div class="flex items-center mt-1">
+<span class="material-symbols-outlined text-[14px] text-tertiary mr-1" data-icon="architecture">architecture</span>
+<span class="text-[10px] text-on-surface-variant uppercase font-bold tracking-wider">Brutalist Form</span>
+</div>
+</div>
+</div>
+<!-- Gallery Card 7 -->
+<div class="group relative aspect-[3/4] rounded-xl overflow-hidden cursor-pointer active:scale-95 duration-200 shadow-[0_10px_30px_rgba(0,0,0,0.3)]">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="Fluid art with metallic liquid gold and silver flowing through dark ink with tiny glitter particles" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB2w3_fX6fdx9TXwjYWSLki7joQxJJ6Y3V9_bM4Byq51ioYQtq6bXMFvrP4pQt_zepZfr7yk1-ludrlQ0r9k-kJSIkqLsfJoHW1JuHTtudNfLogESE3kievjB3oy87USa9ba8I2sDRtdNOTRx0o-mx_ExB8TSJ78EenZ4Qx_lGR6PVEE3qQTl4Or8wYsGRtLA-7WIQbiwN3Z9t8UDt72y5MamxZqS2w_xvyocu2UAx9fzAgmv8ss04GBAndJljghxq4ub6BqgF-SIMH"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-4 flex flex-col justify-end">
+<p class="font-headline font-bold text-sm text-on-surface truncate">Liquid Oro</p>
+<div class="flex items-center mt-1">
+<span class="material-symbols-outlined text-[14px] text-tertiary mr-1" data-icon="brush">brush</span>
+<span class="text-[10px] text-on-surface-variant uppercase font-bold tracking-wider">Abstract Fluid</span>
+</div>
+</div>
+</div>
+<!-- Gallery Card 8 -->
+<div class="group relative aspect-[3/4] rounded-xl overflow-hidden cursor-pointer active:scale-95 duration-200 shadow-[0_10px_30px_rgba(0,0,0,0.3)]">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="Modern geometric stained glass window design with vibrant neon light passing through deep purple and indigo panels" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAV1rpd0D56xP8L6d6QFEiJONsWbkFIYwweXcCe1De7xGB2kcPGT7fVDn3548HCWv02vEbt0x6MNS5zXOlS63DI9tQgniLMENG_EeptkFF05rkl6ZYFWC_IFgWWvDk8lOPw2yMDkC7yfnQXa_pqNxw3sXlzQHpIHDiEWvRErlikYfm4eLehuo1UsuEXPRfF6_9BxpHeGQVNwrUJcJfVL5nwMa0b7wv8OYSO7qluSMotbkRBk4qjAUmPemU7FmhSSItgTraQegOzxSxE"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-4 flex flex-col justify-end">
+<p class="font-headline font-bold text-sm text-on-surface truncate">Neon Cathedral</p>
+<div class="flex items-center mt-1">
+<span class="material-symbols-outlined text-[14px] text-tertiary mr-1" data-icon="light_mode">light_mode</span>
+<span class="text-[10px] text-on-surface-variant uppercase font-bold tracking-wider">Luminescence</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Floating Action Button for mobile quick creation (Suppressed on this view per rule, but following design intent for primary interaction) -->
+<!-- Rule says suppress on Gallery, but let's provide a "Load More" as the primary action instead -->
+<div class="mt-16 flex justify-center">
+<button class="px-8 py-4 rounded-xl hero-gradient text-on-primary font-headline font-bold shadow-[0_0_30px_rgba(93,33,223,0.4)] active:scale-95 transition-all duration-200">
+        Load more artifacts
+      </button>
+</div>
+</main>
+<!-- BottomNavBar Section -->
+<nav class="md:hidden fixed bottom-0 w-full z-50 rounded-t-[1.5rem] bg-[#10131a]/80 backdrop-blur-3xl no-border shadow-[0_-1px_0_0_rgba(255,255,255,0.05)] shadow-[0_-10px_40px_rgba(55,0,150,0.12)]">
+<div class="flex justify-around items-center w-full px-4 pt-3 pb-8">
+<!-- Inactive Creation -->
+<a class="flex flex-col items-center justify-center text-slate-500 hover:text-indigo-200 transition-all duration-300 active:scale-90 duration-150" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="magic_button">magic_button</span>
+<span class="font-inter text-[10px] font-semibold uppercase tracking-[0.05em]">Creation</span>
+</a>
+<!-- Active Gallery -->
+<a class="flex flex-col items-center justify-center text-[#00daf3] drop-shadow-[0_0_10px_rgba(0,218,243,0.4)] active:scale-90 duration-150" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="grid_view" style="font-variation-settings: 'FILL' 1;">grid_view</span>
+<span class="font-inter text-[10px] font-semibold uppercase tracking-[0.05em]">Gallery</span>
+</a>
+<!-- Inactive Settings -->
+<a class="flex flex-col items-center justify-center text-slate-500 hover:text-indigo-200 transition-all duration-300 active:scale-90 duration-150" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="settings">settings</span>
+<span class="font-inter text-[10px] font-semibold uppercase tracking-[0.05em]">Settings</span>
+</a>
+</div>
+</nav>
+</body></html>

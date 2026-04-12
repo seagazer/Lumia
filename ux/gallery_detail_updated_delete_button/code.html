@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Lumia AI - Gallery Artifact</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@400;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary": "#c7bfff",
+                        "outline-variant": "#494456",
+                        "surface-bright": "#363940",
+                        "on-primary-container": "#cebfff",
+                        "on-secondary-fixed-variant": "#4433a4",
+                        "outline": "#948da2",
+                        "on-secondary-fixed": "#180065",
+                        "on-primary-fixed-variant": "#4f00d0",
+                        "surface-container-high": "#272a31",
+                        "inverse-on-surface": "#2e3037",
+                        "tertiary": "#00daf3",
+                        "primary": "#cdbdff",
+                        "tertiary-fixed-dim": "#00daf3",
+                        "primary-container": "#5d21df",
+                        "on-surface-variant": "#cbc3d9",
+                        "on-error": "#690005",
+                        "surface-container-highest": "#32353c",
+                        "on-primary": "#370096",
+                        "error": "#ffb4ab",
+                        "background": "#10131a",
+                        "on-background": "#e1e2eb",
+                        "inverse-primary": "#6833ea",
+                        "surface-dim": "#10131a",
+                        "surface-container": "#1d2026",
+                        "on-tertiary": "#00363d",
+                        "on-tertiary-fixed": "#001f24",
+                        "inverse-surface": "#e1e2eb",
+                        "surface": "#10131a",
+                        "surface-tint": "#cdbdff",
+                        "primary-fixed-dim": "#cdbdff",
+                        "error-container": "#93000a",
+                        "tertiary-fixed": "#9cf0ff",
+                        "tertiary-container": "#005d68",
+                        "on-error-container": "#ffdad6",
+                        "secondary-fixed": "#e5deff",
+                        "surface-container-lowest": "#0b0e14",
+                        "on-tertiary-container": "#00dcf5",
+                        "on-primary-fixed": "#20005f",
+                        "surface-variant": "#32353c",
+                        "on-surface": "#e1e2eb",
+                        "secondary-container": "#4635a7",
+                        "surface-container-low": "#191c22",
+                        "on-secondary": "#2c148e",
+                        "primary-fixed": "#e8deff",
+                        "on-secondary-container": "#b8afff",
+                        "secondary-fixed-dim": "#c7bfff",
+                        "on-tertiary-fixed-variant": "#004f58"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #10131a;
+            color: #e1e2eb;
+            font-family: 'Inter', sans-serif;
+        }
+        .glass-card {
+            background: rgba(50, 53, 60, 0.4);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 right-0 z-50 bg-[#10131a]/60 backdrop-blur-2xl tonal-transition bg-gradient-to-b from-[#10131a] to-transparent">
+<div class="flex justify-between items-center w-full px-6 h-16">
+<div class="flex items-center gap-4">
+<button class="text-on-surface hover:opacity-80 transition-opacity active:scale-95 duration-200">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-indigo-400" data-icon="auto_awesome">auto_awesome</span>
+<h1 class="text-xl font-black text-indigo-50 tracking-tighter font-headline">Lumia AI</h1>
+</div>
+</div>
+<div class="w-8 h-8 rounded-full overflow-hidden">
+<img alt="User profile photo" class="w-full h-full object-cover" data-alt="close-up portrait of a modern digital artist with soft neon lighting reflections on their skin" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCO8Q-D2XyX6eLLQCCgyzbVgOLXrJuiI_4ByeDDmq0_LtAeaKBrGXASMeSDgPxhb3CdkV_uWAlDlcoZwvwCqBF3drgNwKWylDyaeBO0qRuBm1dVkgoaUKK795bIXFKx_c1YgZ5W0GLKuEc1YemIXccAreTDdBH1_is9hMKs7wlab26GfonizbPgTVGlZc3tOtnv0cGDTfzGwM5viwJnRdnR5Z0AexLfNneRc6p-iKRUwkZKVkPyCV_3kvQ4j231gp8sOj9EUIkFb3xD"/>
+</div>
+</div>
+</header>
+<main class="pt-20 px-6 max-w-4xl mx-auto space-y-8">
+<!-- Hero Preview Image -->
+<div class="relative group">
+<div class="absolute -inset-1 bg-gradient-to-tr from-primary-container to-tertiary opacity-20 blur-2xl group-hover:opacity-30 transition-opacity"></div>
+<div class="relative rounded-xl overflow-hidden aspect-[4/5] bg-surface-container-low">
+<img alt="Main generation" class="w-full h-full object-cover" data-alt="ethereal portrait of a woman merged with cosmic nebula patterns, deep violets and glowing cyan lighting, high-tech digital art style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBm--JK_B80Q3QFCJhCKiIyOI4kvzFGMCQaW29jAL3y6B9ghqkxS5pnqgpcnVcGPtr5Iu4LlFP23ij699WRyoAGYiC_MeHlYuG6FB0FiWQtjD9o7awXJZFvp8QgJQi7hPjx-Y_xM0GQyX3TM6vdRqk8nolvLFf0HlQ0AwVDPG1U0jAM3KAAAdLl7u2rYtRA-P1CXCJAMJ_0N3toqE_mF_IVN03sIRew6P3r7JcMkW4Z5TsHGGTCjPb2eu7_dCBPk2GjmJtA9yoAr2tc"/>
+</div>
+</div>
+<!-- Created On Meta -->
+<div class="flex items-center justify-between">
+<div class="space-y-1">
+<p class="text-slate-500 font-inter text-[10px] font-semibold uppercase tracking-[0.05em]">Created on</p>
+<h2 class="text-on-surface font-headline font-bold text-lg">October 24, 2024, 14:30</h2>
+</div>
+<button class="flex items-center gap-2 px-4 py-2 rounded-full glass-card border border-white/5 text-secondary hover:bg-white/10 transition-all">
+<span class="material-symbols-outlined text-sm">download</span>
+<span class="text-sm font-semibold">Export</span>
+</button>
+</div>
+<!-- Generation Prompt Section -->
+<section class="space-y-3">
+<h3 class="text-slate-500 font-inter text-[10px] font-semibold uppercase tracking-[0.05em]">Generation Prompt</h3>
+<div class="glass-card p-6 rounded-xl border border-white/5 relative overflow-hidden">
+<div class="absolute top-0 left-0 w-1 h-full bg-primary-container"></div>
+<p class="text-on-surface leading-relaxed italic font-headline text-lg">
+                    "A celestial goddess woven from starlight and cosmic dust, wearing a gown made of swirling galaxies, cinematic lighting, ultra-detailed 8k, ethereal atmosphere."
+                </p>
+</div>
+</section>
+<!-- Generation Parameters Grid (Bento Style) -->
+<section class="space-y-3">
+<h3 class="text-slate-500 font-inter text-[10px] font-semibold uppercase tracking-[0.05em]">Parameters</h3>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+<div class="bg-surface-container-low p-4 rounded-xl flex flex-col gap-1">
+<span class="text-slate-500 text-xs font-medium">Resolution</span>
+<span class="text-on-surface font-headline font-bold">2048 x 2048</span>
+</div>
+<div class="bg-surface-container-low p-4 rounded-xl flex flex-col gap-1">
+<span class="text-slate-500 text-xs font-medium">Quality</span>
+<span class="text-tertiary font-headline font-bold">High</span>
+</div>
+<div class="bg-surface-container-low p-4 rounded-xl flex flex-col gap-1">
+<span class="text-slate-500 text-xs font-medium">Sampler</span>
+<span class="text-on-surface font-headline font-bold">Euler a</span>
+</div>
+<div class="bg-surface-container-low p-4 rounded-xl flex flex-col gap-1">
+<span class="text-slate-500 text-xs font-medium">Seed</span>
+<span class="text-on-surface font-headline font-bold">842910475</span>
+</div>
+</div>
+</section>
+<!-- Action Section -->
+<div class="pt-6 pb-12">
+<button class="w-full py-5 rounded-xl bg-gradient-to-br from-primary-container to-primary text-white font-headline text-lg font-extrabold tracking-tight hover:brightness-110 transition-all duration-300 active:scale-[0.98] shadow-[0_10px_40px_rgba(93,33,223,0.3)] flex items-center justify-center gap-3">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">delete</span>
+Delete Artifact
+</button>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 rounded-t-[1.5rem] bg-[#10131a]/80 backdrop-blur-3xl shadow-[0_-1px_0_0_rgba(255,255,255,0.05)]">
+<div class="flex justify-around items-center w-full px-4 pt-3 pb-8">
+<a class="flex flex-col items-center justify-center text-slate-500 hover:text-indigo-200 transition-all duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="magic_button">magic_button</span>
+<span class="font-inter text-[10px] font-semibold uppercase tracking-[0.05em] mt-1">Creation</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#00daf3] drop-shadow-[0_0_10px_rgba(0,218,243,0.4)]" href="#">
+<span class="material-symbols-outlined" data-icon="grid_view" style="font-variation-settings: 'FILL' 1;">grid_view</span>
+<span class="font-inter text-[10px] font-semibold uppercase tracking-[0.05em] mt-1">Gallery</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 hover:text-indigo-200 transition-all duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-inter text-[10px] font-semibold uppercase tracking-[0.05em] mt-1">Settings</span>
+</a>
+</div>
+</nav>
+</body></html>
