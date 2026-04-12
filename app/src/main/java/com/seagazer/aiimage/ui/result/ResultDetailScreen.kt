@@ -28,6 +28,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -97,6 +99,8 @@ fun ResultDetailScreen(
     onExport: () -> Boolean,
     onDeleteFromGallery: (() -> Unit)? = null,
     onImageViewerVisibilityChanged: ((Boolean) -> Unit)? = null,
+    isFromPrivateSpace: Boolean = false,
+    onTogglePrivate: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current
     var saveBanner by remember { mutableStateOf(false) }
@@ -178,6 +182,8 @@ fun ResultDetailScreen(
                                 onImageClick = { showFullScreen = true },
                                 sharedTransitionScope = this@SharedTransitionLayout,
                                 animatedVisibilityScope = this@AnimatedContent,
+                                isFromPrivateSpace = isFromPrivateSpace,
+                                onTogglePrivate = onTogglePrivate,
                             )
                         } else {
                             GenerationResultContent(
@@ -211,6 +217,8 @@ private fun GalleryArtifactContent(
     onImageClick: () -> Unit,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope,
+    isFromPrivateSpace: Boolean = false,
+    onTogglePrivate: (() -> Unit)? = null,
 ) {
     Box(
         modifier = Modifier
@@ -397,7 +405,54 @@ private fun GalleryArtifactContent(
         )
     }
 
-    if (showDelete) {
+    if (onTogglePrivate != null) {
+        Spacer(Modifier.height(20.dp))
+        val privateButtonBrush = if (isFromPrivateSpace) {
+            etherealPrimaryGradientBrush()
+        } else {
+            Brush.linearGradient(
+                colors = listOf(
+                    MaterialTheme.colorScheme.tertiary.copy(alpha = 0.85f),
+                    MaterialTheme.colorScheme.tertiary,
+                ),
+            )
+        }
+        val privateIcon = if (isFromPrivateSpace) Icons.Filled.LockOpen else Icons.Filled.Lock
+        val privateText = if (isFromPrivateSpace) {
+            stringResource(R.string.remove_from_private)
+        } else {
+            stringResource(R.string.move_to_private)
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+                .clip(RoundedCornerShape(LumiaDesign.radiusLg))
+                .background(privateButtonBrush)
+                .cloudShadow(RoundedCornerShape(LumiaDesign.radiusLg), 16.dp)
+                .clickable(role = Role.Button, onClick = onTogglePrivate),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+        ) {
+            Icon(
+                privateIcon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onPrimary,
+                modifier = Modifier.size(22.dp),
+            )
+            Spacer(Modifier.size(10.dp))
+            Text(
+                text = privateText,
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = (-0.2).sp,
+                ),
+                color = MaterialTheme.colorScheme.onPrimary,
+            )
+        }
+    }
+
+    if (showDelete && !isFromPrivateSpace) {
         Spacer(Modifier.height(28.dp))
         LumiaDestructiveGradientButton(
             text = stringResource(R.string.delete_artifact),

@@ -29,6 +29,7 @@ import androidx.compose.material.icons.outlined.DeleteSweep
 import androidx.compose.material.icons.outlined.DisplaySettings
 import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material.icons.outlined.GridView
+import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.PhotoLibrary
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.DropdownMenu
@@ -101,6 +102,7 @@ fun GalleryScreen(
     items: List<GalleryItem>,
     onOpenItem: (GalleryItem) -> Unit,
     onOpenRecycleBin: () -> Unit,
+    onOpenPrivateSpace: () -> Unit = {},
     lazyGridState: LazyGridState = rememberLazyGridState(),
     scrollToItemId: String? = null,
     onScrollToItemConsumed: () -> Unit = {},
@@ -128,6 +130,13 @@ fun GalleryScreen(
         Column(Modifier.fillMaxSize()) {
             LumiaTopAppBar(
                 trailing = {
+                    IconButton(onClick = onOpenPrivateSpace) {
+                        Icon(
+                            Icons.Outlined.Lock,
+                            contentDescription = stringResource(R.string.cd_private_space),
+                            tint = MaterialTheme.colorScheme.onSurface,
+                        )
+                    }
                     IconButton(onClick = onOpenRecycleBin) {
                         Icon(
                             Icons.Outlined.DeleteSweep,

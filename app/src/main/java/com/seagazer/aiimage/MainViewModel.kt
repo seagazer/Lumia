@@ -53,6 +53,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _recycleBin = MutableStateFlow<List<GalleryItem>>(emptyList())
     val recycleBin: StateFlow<List<GalleryItem>> = _recycleBin.asStateFlow()
 
+    private val _privateSpace = MutableStateFlow<List<GalleryItem>>(emptyList())
+    val privateSpace: StateFlow<List<GalleryItem>> = _privateSpace.asStateFlow()
+
+    /** True when the currently displayed [ResultDetail] was opened from the private space list. */
+    private val _resultFromPrivateSpace = MutableStateFlow(false)
+    val resultFromPrivateSpace: StateFlow<Boolean> = _resultFromPrivateSpace.asStateFlow()
+
     private val _resultDetail = MutableStateFlow<ResultDetail?>(null)
     val resultDetail: StateFlow<ResultDetail?> = _resultDetail.asStateFlow()
 
@@ -133,6 +140,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         _simulateFailure.value = AppPreferences.loadSimulateFailure(app)
         _gallery.value = filterReachableGallery(AppPreferences.loadGallery(app))
         _recycleBin.value = filterReachableGallery(AppPreferences.loadRecycleBin(app))
+        _privateSpace.value = filterReachableGallery(AppPreferences.loadPrivateSpace(app))
         AppPreferences.loadGenerationSettings(app)?.let { _generationSettings.value = it }
         _prompt.value = AppPreferences.loadCreatePrompt(app)
         _selectedStyles.value = AppPreferences.loadSelectedStyles(app)
@@ -208,6 +216,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         AppPreferences.saveRecycleBin(getApplication(), _recycleBin.value)
     }
 
+    private fun persistPrivateSpace() {
+        AppPreferences.savePrivateSpace(getApplication(), _privateSpace.value)
+    }
+
     private fun filterReachableGallery(items: List<GalleryItem>): List<GalleryItem> =
         items.filter { item ->
             when {
@@ -236,8 +248,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         File(app.cacheDir, "comfy_out").deleteRecursively()
         _gallery.value = emptyList()
         _recycleBin.value = emptyList()
+        _privateSpace.value = emptyList()
         AppPreferences.saveGallery(app, emptyList())
         AppPreferences.saveRecycleBin(app, emptyList())
+        AppPreferences.savePrivateSpace(app, emptyList())
     }
 
     fun showNetworkError(value: Boolean) {
@@ -252,6 +266,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun openResultFromGallery(item: GalleryItem) {
         _resultFromGallery.value = true
+        _resultFromPrivateSpace.value = false
         _resultBottomTabGallery.value = true
         val prompt = item.prompt.ifBlank { item.caption ?: "" }
         _resultDetail.value = ResultDetail(
@@ -269,6 +284,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun openResultFromGeneration(detail: ResultDetail) {
         _resultFromGallery.value = false
+        _resultFromPrivateSpace.value = false
         _resultBottomTabGallery.value = true
         _resultDetail.value = detail
     }
@@ -314,6 +330,88 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         persistRecycleBin()
         _gallery.update { list -> listOf(restored) + list.filterNot { it.id == id } }
         persistGallery()
+    }
+
+    fun isPrivatePasswordSet(): Boolean =
+        AppPreferences.isPrivatePasswordSet(getApplication())
+
+    fun verifyPrivatePassword(password: String): Boolean =
+        AppPreferences.loadPrivatePassword(getApplication()) == password
+
+    fun setPrivatePassword(password: String) {
+        AppPreferences.savePrivatePassword(getApplication(), password)
+    }
+
+    fun openResultFromPrivateSpace(item: GalleryItem) {
+        _resultFromGallery.value = true
+        _resultFromPrivateSpace.value = true
+        _resultBottomTabGallery.value = true
+        val prompt = item.prompt.ifBlank { item.caption ?: "" }
+        _resultDetail.value = ResultDetail(
+            id = item.id,
+            imageUrl = item.imageUrl,
+            prompt = prompt,
+            modelLabel = item.modelLabel.ifBlank { "ComfyUI" },
+            seed = item.seed.ifBlank { "—" },
+            sampling = item.sampling.ifBlank { "—" },
+            steps = item.steps.ifBlank { "—" },
+            width = item.width,
+            height = item.height,
+        )
+    }
+
+    fun moveGalleryItemToPrivateSpace(id: String) {
+        val item = _gallery.value.find { it.id == id } ?: return
+        val app = getApplication<Application>()
+        val moved = moveLocalFileToPrivate(app, item)
+        _gallery.update { list -> list.filterNot { it.id == id } }
+        persistGallery()
+        _privateSpace.update { list -> listOf(moved) + list.filterNot { it.id == id } }
+        persistPrivateSpace()
+        if (_resultDetail.value?.id == id) clearResult()
+    }
+
+    fun restorePrivateSpaceItemToGallery(id: String) {
+        val item = _privateSpace.value.find { it.id == id } ?: return
+        val app = getApplication<Application>()
+        val restored = moveLocalFileFromPrivateToGallery(app, item)
+        _privateSpace.update { list -> list.filterNot { it.id == id } }
+        persistPrivateSpace()
+        _gallery.update { list -> listOf(restored) + list.filterNot { it.id == id } }
+        persistGallery()
+        if (_resultDetail.value?.id == id) clearResult()
+    }
+
+    private fun moveLocalFileToPrivate(app: Application, item: GalleryItem): GalleryItem {
+        if (!item.imageUrl.startsWith("file:")) return item
+        val src = runCatching { File(URI.create(item.imageUrl)) }.getOrNull() ?: return item
+        if (!src.isFile) return item
+        val privateDir = AppGalleryStorage.ensurePrivateDirectory(app)
+        val dest = File(privateDir, "${item.id}.png")
+        if (dest.exists()) dest.delete()
+        if (!src.renameTo(dest)) {
+            runCatching {
+                src.copyTo(dest, overwrite = true)
+                src.delete()
+            }
+        }
+        return item.copy(imageUrl = dest.toURI().toString())
+    }
+
+    private fun moveLocalFileFromPrivateToGallery(app: Application, item: GalleryItem): GalleryItem {
+        if (!item.imageUrl.startsWith("file:")) return item
+        val src = runCatching { File(URI.create(item.imageUrl)) }.getOrNull() ?: return item
+        if (!src.isFile) return item
+        val galleryDir = AppGalleryStorage.ensureDirectory(app)
+        val dest = File(galleryDir, "${item.id}.png")
+        if (dest.exists()) dest.delete()
+        if (!src.renameTo(dest)) {
+            runCatching {
+                src.copyTo(dest, overwrite = true)
+                src.delete()
+            }
+        }
+        return item.copy(imageUrl = dest.toURI().toString())
     }
 
     fun permanentlyDeleteRecycleBinItem(id: String) {

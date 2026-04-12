@@ -167,4 +167,22 @@
     <string name="clear_cache_confirm_body">This will remove all locally stored temporary images and prompt history. This action cannot be undone.</string>
     <string name="clear_everything">Clear Everything</string>
     <string name="comfy_section_advanced">Connection &amp; models</string>
+
+    <string name="private_space">Private Space</string>
+    <string name="cd_private_space">Private space</string>
+    <string name="move_to_private">Move to Private</string>
+    <string name="remove_from_private">Remove from Private</string>
+    <string name="private_space_empty_title">Private space is empty</string>
+    <string name="private_space_empty_hint">Images you mark as private will appear here.</string>
+    <string name="set_password_title">Set Password</string>
+    <string name="set_password_body">Set a 6-digit password to protect your private space.</string>
+    <string name="enter_password_title">Enter Password</string>
+    <string name="enter_password_body">Enter your 6-digit password to access the private space.</string>
+    <string name="confirm_password_hint">Confirm password</string>
+    <string name="password_mismatch">Passwords do not match. Please try again.</string>
+    <string name="password_incorrect">Incorrect password. Please try again.</string>
+    <string name="password_too_short">Password must be 6 digits.</string>
+    <string name="confirm">Confirm</string>
+    <string name="moved_to_private_space">Moved to private space</string>
+    <string name="restored_from_private_space">Restored to gallery</string>
 </resources>

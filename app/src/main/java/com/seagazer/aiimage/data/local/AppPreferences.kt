@@ -24,6 +24,8 @@ object AppPreferences {
     private const val KEY_SELECTED_STYLES = "selected_styles_v1"
     private const val KEY_DAILY_GEN_DATE = "daily_gen_date_v1"
     private const val KEY_DAILY_GEN_COUNT = "daily_gen_count_v1"
+    private const val KEY_PRIVATE_SPACE = "private_space_json_v1"
+    private const val KEY_PRIVATE_PASSWORD = "private_space_password"
 
     /** TODO: Max ComfyUI generation requests per calendar day (each request counts once). */
     const val MAX_DAILY_GENERATIONS = 500
@@ -158,6 +160,25 @@ object AppPreferences {
             .apply()
         true
     }
+
+    fun loadPrivateSpace(ctx: Context): List<GalleryItem> {
+        val raw = sp(ctx).getString(KEY_PRIVATE_SPACE, null) ?: return emptyList()
+        return runCatching { galleryFromJson(raw) }.getOrDefault(emptyList())
+    }
+
+    fun savePrivateSpace(ctx: Context, items: List<GalleryItem>) {
+        sp(ctx).edit().putString(KEY_PRIVATE_SPACE, galleryToJson(items)).apply()
+    }
+
+    fun loadPrivatePassword(ctx: Context): String? =
+        sp(ctx).getString(KEY_PRIVATE_PASSWORD, null)
+
+    fun savePrivatePassword(ctx: Context, password: String) {
+        sp(ctx).edit().putString(KEY_PRIVATE_PASSWORD, password).apply()
+    }
+
+    fun isPrivatePasswordSet(ctx: Context): Boolean =
+        !sp(ctx).getString(KEY_PRIVATE_PASSWORD, null).isNullOrEmpty()
 
     private fun galleryToJson(items: List<GalleryItem>): String {
         val arr = JSONArray()
