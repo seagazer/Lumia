@@ -3,12 +3,15 @@ package com.seagazer.aiimage
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.seagazer.aiimage.data.GalleryRepository
 import com.seagazer.aiimage.data.comfy.ComfyApiClient
 import com.seagazer.aiimage.data.comfy.ComfyApiException
 import com.seagazer.aiimage.data.comfy.ComfyWorkflowPatcher
 import com.seagazer.aiimage.data.local.AppPreferences
 import com.seagazer.aiimage.util.AppGalleryStorage
+import com.seagazer.aiimage.util.AppLocale
 import com.seagazer.aiimage.util.PublicAlbumSaver
+import com.seagazer.aiimage.domain.AppLanguageOption
 import com.seagazer.aiimage.domain.GalleryItem
 import com.seagazer.aiimage.domain.GenerationSettings
 import com.seagazer.aiimage.domain.ResultDetail
@@ -35,8 +38,13 @@ import kotlin.random.Random
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
+    private val galleryRepo = GalleryRepository(application)
+
     private val _themeDark = MutableStateFlow(true)
     val themeDark: StateFlow<Boolean> = _themeDark.asStateFlow()
+
+    private val _appLanguage = MutableStateFlow(AppLanguageOption.System)
+    val appLanguage: StateFlow<AppLanguageOption> = _appLanguage.asStateFlow()
 
     private val _generationSettings = MutableStateFlow(GenerationSettings())
     val generationSettings: StateFlow<GenerationSettings> = _generationSettings.asStateFlow()
@@ -133,23 +141,34 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     init {
         val app = getApplication<Application>()
         _themeDark.value = AppPreferences.loadThemeDark(app)
+        _appLanguage.value = AppPreferences.loadAppLanguage(app)
         _comfyBaseUrl.value = AppPreferences.loadComfyUrl(app, BuildConfig.DEFAULT_COMFY_BASE_URL)
         _comfyCheckpointFile.value = AppPreferences.loadComfyCheckpoint(app)
         _comfyClipFile.value = AppPreferences.loadComfyClip(app)
         _comfyVaeFile.value = AppPreferences.loadComfyVae(app)
         _simulateFailure.value = AppPreferences.loadSimulateFailure(app)
-        _gallery.value = filterReachableGallery(AppPreferences.loadGallery(app))
-        _recycleBin.value = filterReachableGallery(AppPreferences.loadRecycleBin(app))
-        _privateSpace.value = filterReachableGallery(AppPreferences.loadPrivateSpace(app))
         AppPreferences.loadGenerationSettings(app)?.let { _generationSettings.value = it }
         _prompt.value = AppPreferences.loadCreatePrompt(app)
         _selectedStyles.value = AppPreferences.loadSelectedStyles(app)
         _dailyGenerationsUsed.value = AppPreferences.getTodayGenerationCount(app)
+
+        viewModelScope.launch(Dispatchers.IO) {
+            _gallery.value = galleryRepo.loadGallery()
+            _recycleBin.value = galleryRepo.loadRecycleBin()
+            _privateSpace.value = galleryRepo.loadPrivateSpace()
+        }
     }
 
     fun setThemeDark(value: Boolean) {
         _themeDark.value = value
         AppPreferences.saveThemeDark(getApplication(), value)
+    }
+
+    fun setAppLanguage(option: AppLanguageOption) {
+        _appLanguage.value = option
+        val app = getApplication<Application>()
+        AppPreferences.saveAppLanguage(app, option)
+        AppLocale.applyOption(option)
     }
 
     fun setPrompt(value: String) {
@@ -208,27 +227,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         )
     }
 
-    private fun persistGallery() {
-        AppPreferences.saveGallery(getApplication(), _gallery.value)
-    }
-
-    private fun persistRecycleBin() {
-        AppPreferences.saveRecycleBin(getApplication(), _recycleBin.value)
-    }
-
-    private fun persistPrivateSpace() {
-        AppPreferences.savePrivateSpace(getApplication(), _privateSpace.value)
-    }
-
-    private fun filterReachableGallery(items: List<GalleryItem>): List<GalleryItem> =
-        items.filter { item ->
-            when {
-                item.imageUrl.startsWith("file:") ->
-                    runCatching { File(URI.create(item.imageUrl)).isFile }.getOrDefault(false)
-                item.imageUrl.startsWith("http://") || item.imageUrl.startsWith("https://") -> true
-                else -> false
-            }
-        }
+    private fun persistGallery() = galleryRepo.saveGallery(_gallery.value)
+    private fun persistRecycleBin() = galleryRepo.saveRecycleBin(_recycleBin.value)
+    private fun persistPrivateSpace() = galleryRepo.savePrivateSpace(_privateSpace.value)
 
     /**
      * Copies the result image (local file from Comfy download) into the public Pictures album.
@@ -241,17 +242,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }.getOrDefault(false)
     }
 
-    /** Deletes persisted gallery images, JSON, and temp Comfy cache files */
     fun clearAppCaches() {
-        val app = getApplication<Application>()
-        AppGalleryStorage.directory(app).deleteRecursively()
-        File(app.cacheDir, "comfy_out").deleteRecursively()
+        galleryRepo.clearAll()
         _gallery.value = emptyList()
         _recycleBin.value = emptyList()
         _privateSpace.value = emptyList()
-        AppPreferences.saveGallery(app, emptyList())
-        AppPreferences.saveRecycleBin(app, emptyList())
-        AppPreferences.savePrivateSpace(app, emptyList())
     }
 
     fun showNetworkError(value: Boolean) {
@@ -313,8 +308,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
      */
     fun moveGalleryItemToRecycleBin(id: String) {
         val item = _gallery.value.find { it.id == id } ?: return
-        val app = getApplication<Application>()
-        val moved = moveLocalGalleryFileToTrash(app, item)
+        val moved = galleryRepo.moveToTrash(item)
         _gallery.update { list -> list.filterNot { it.id == id } }
         persistGallery()
         _recycleBin.update { list -> listOf(moved) + list.filterNot { it.id == id } }
@@ -324,8 +318,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun restoreRecycleBinItem(id: String) {
         val item = _recycleBin.value.find { it.id == id } ?: return
-        val app = getApplication<Application>()
-        val restored = moveLocalFileFromTrashToGallery(app, item)
+        val restored = galleryRepo.moveToGalleryDir(item)
         _recycleBin.update { list -> list.filterNot { it.id == id } }
         persistRecycleBin()
         _gallery.update { list -> listOf(restored) + list.filterNot { it.id == id } }
@@ -336,7 +329,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         AppPreferences.isPrivatePasswordSet(getApplication())
 
     fun verifyPrivatePassword(password: String): Boolean =
-        AppPreferences.loadPrivatePassword(getApplication()) == password
+        AppPreferences.verifyPrivatePassword(getApplication(), password)
 
     fun setPrivatePassword(password: String) {
         AppPreferences.savePrivatePassword(getApplication(), password)
@@ -362,8 +355,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun moveGalleryItemToPrivateSpace(id: String) {
         val item = _gallery.value.find { it.id == id } ?: return
-        val app = getApplication<Application>()
-        val moved = moveLocalFileToPrivate(app, item)
+        val moved = galleryRepo.moveToPrivateDir(item)
         _gallery.update { list -> list.filterNot { it.id == id } }
         persistGallery()
         _privateSpace.update { list -> listOf(moved) + list.filterNot { it.id == id } }
@@ -373,8 +365,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun restorePrivateSpaceItemToGallery(id: String) {
         val item = _privateSpace.value.find { it.id == id } ?: return
-        val app = getApplication<Application>()
-        val restored = moveLocalFileFromPrivateToGallery(app, item)
+        val restored = galleryRepo.moveToGalleryDir(item)
         _privateSpace.update { list -> list.filterNot { it.id == id } }
         persistPrivateSpace()
         _gallery.update { list -> listOf(restored) + list.filterNot { it.id == id } }
@@ -382,80 +373,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         if (_resultDetail.value?.id == id) clearResult()
     }
 
-    private fun moveLocalFileToPrivate(app: Application, item: GalleryItem): GalleryItem {
-        if (!item.imageUrl.startsWith("file:")) return item
-        val src = runCatching { File(URI.create(item.imageUrl)) }.getOrNull() ?: return item
-        if (!src.isFile) return item
-        val privateDir = AppGalleryStorage.ensurePrivateDirectory(app)
-        val dest = File(privateDir, "${item.id}.png")
-        if (dest.exists()) dest.delete()
-        if (!src.renameTo(dest)) {
-            runCatching {
-                src.copyTo(dest, overwrite = true)
-                src.delete()
-            }
-        }
-        return item.copy(imageUrl = dest.toURI().toString())
-    }
-
-    private fun moveLocalFileFromPrivateToGallery(app: Application, item: GalleryItem): GalleryItem {
-        if (!item.imageUrl.startsWith("file:")) return item
-        val src = runCatching { File(URI.create(item.imageUrl)) }.getOrNull() ?: return item
-        if (!src.isFile) return item
-        val galleryDir = AppGalleryStorage.ensureDirectory(app)
-        val dest = File(galleryDir, "${item.id}.png")
-        if (dest.exists()) dest.delete()
-        if (!src.renameTo(dest)) {
-            runCatching {
-                src.copyTo(dest, overwrite = true)
-                src.delete()
-            }
-        }
-        return item.copy(imageUrl = dest.toURI().toString())
-    }
-
     fun permanentlyDeleteRecycleBinItem(id: String) {
         val item = _recycleBin.value.find { it.id == id } ?: return
-        if (item.imageUrl.startsWith("file:")) {
-            runCatching {
-                val f = File(URI.create(item.imageUrl))
-                if (f.isFile) f.delete()
-            }
-        }
+        galleryRepo.deleteFile(item)
         _recycleBin.update { list -> list.filterNot { it.id == id } }
         persistRecycleBin()
-    }
-
-    private fun moveLocalGalleryFileToTrash(app: Application, item: GalleryItem): GalleryItem {
-        if (!item.imageUrl.startsWith("file:")) return item
-        val src = runCatching { File(URI.create(item.imageUrl)) }.getOrNull() ?: return item
-        if (!src.isFile) return item
-        val trashDir = AppGalleryStorage.ensureTrashDirectory(app)
-        val dest = File(trashDir, "${item.id}.png")
-        if (dest.exists()) dest.delete()
-        if (!src.renameTo(dest)) {
-            runCatching {
-                src.copyTo(dest, overwrite = true)
-                src.delete()
-            }
-        }
-        return item.copy(imageUrl = dest.toURI().toString())
-    }
-
-    private fun moveLocalFileFromTrashToGallery(app: Application, item: GalleryItem): GalleryItem {
-        if (!item.imageUrl.startsWith("file:")) return item
-        val src = runCatching { File(URI.create(item.imageUrl)) }.getOrNull() ?: return item
-        if (!src.isFile) return item
-        val galleryDir = AppGalleryStorage.ensureDirectory(app)
-        val dest = File(galleryDir, "${item.id}.png")
-        if (dest.exists()) dest.delete()
-        if (!src.renameTo(dest)) {
-            runCatching {
-                src.copyTo(dest, overwrite = true)
-                src.delete()
-            }
-        }
-        return item.copy(imageUrl = dest.toURI().toString())
     }
 
     fun generateArt(onDone: (ResultDetail?) -> Unit) {

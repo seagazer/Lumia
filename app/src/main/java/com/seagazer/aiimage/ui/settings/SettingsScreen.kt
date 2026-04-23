@@ -22,6 +22,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.DeleteSweep
+import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -50,6 +51,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import com.seagazer.aiimage.R
+import com.seagazer.aiimage.domain.AppLanguageOption
 import com.seagazer.aiimage.util.resolveAppVersionName
 import com.seagazer.aiimage.ui.components.LumiaAmbientBackground
 import com.seagazer.aiimage.ui.components.LumiaDialogMessage
@@ -67,15 +69,28 @@ import androidx.compose.material.icons.filled.Warning
 @Composable
 fun SettingsScreen(
     themeDark: Boolean,
+    appLanguage: AppLanguageOption,
     comfyBaseUrl: String,
     dailyGenerationsUsed: Int,
     dailyGenerationsMax: Int,
     onThemeDarkChange: (Boolean) -> Unit,
+    onAppLanguageChange: (AppLanguageOption) -> Unit,
     onComfyUrlChange: (String) -> Unit,
     onClearCache: () -> Unit,
 ) {
     val context = LocalContext.current
     var clearConfirm by remember { mutableStateOf(false) }
+    var languagePicker by remember { mutableStateOf(false) }
+    if (languagePicker) {
+        LanguagePickerDialog(
+            selected = appLanguage,
+            onDismiss = { languagePicker = false },
+            onSelect = {
+                onAppLanguageChange(it)
+                languagePicker = false
+            },
+        )
+    }
     if (clearConfirm) {
         ClearCacheConfirmDialog(
             onDismiss = { clearConfirm = false },
@@ -121,6 +136,10 @@ fun SettingsScreen(
                         trailing = {
                             LumiaSwitch(checked = themeDark, onCheckedChange = onThemeDarkChange)
                         },
+                    )
+                    LanguageSettingsRow(
+                        currentLabel = appLanguageLabel(appLanguage),
+                        onClick = { languagePicker = true },
                     )
                     Row(
                         modifier = Modifier
@@ -187,6 +206,123 @@ fun SettingsScreen(
                     onBaseUrlChange = onComfyUrlChange,
                 )
                 LumiaFooterLinks()
+            }
+        }
+    }
+}
+
+@Composable
+private fun appLanguageLabel(option: AppLanguageOption): String = when (option) {
+    AppLanguageOption.System -> stringResource(R.string.language_system)
+    AppLanguageOption.English -> stringResource(R.string.language_english)
+    AppLanguageOption.ChineseSimplified -> stringResource(R.string.language_chinese)
+}
+
+@Composable
+private fun LanguageSettingsRow(
+    currentLabel: String,
+    onClick: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.surfaceContainerLow)
+            .clickable(onClick = onClick)
+            .padding(24.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.35f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    Icons.Outlined.Language,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                )
+            }
+            Column(Modifier.padding(start = 16.dp)) {
+                Text(
+                    stringResource(R.string.language),
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Text(
+                    currentLabel,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+        Icon(
+            Icons.Outlined.ChevronRight,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+@Composable
+private fun LanguagePickerDialog(
+    selected: AppLanguageOption,
+    onDismiss: () -> Unit,
+    onSelect: (AppLanguageOption) -> Unit,
+) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            decorFitsSystemWindows = false,
+        ),
+    ) {
+        ApplyDialogDimBehind(dimAmount = 0.5f)
+        LumiaOverlayTheme {
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .padding(24.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                LumiaGlassEffectDialogPanel {
+                    LumiaDialogTitle(stringResource(R.string.language_picker_title))
+                    Spacer(Modifier.height(16.dp))
+                    AppLanguageOption.entries.forEach { option ->
+                        val label = appLanguageLabel(option)
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(10.dp))
+                                .clickable { onSelect(option) }
+                                .padding(vertical = 12.dp, horizontal = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                        ) {
+                            Text(
+                                label,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface,
+                            )
+                            if (option == selected) {
+                                Icon(
+                                    Icons.Filled.Check,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                )
+                            }
+                        }
+                    }
+                    Spacer(Modifier.height(20.dp))
+                    LumiaSecondaryDialogButton(
+                        text = stringResource(R.string.cancel),
+                        onClick = onDismiss,
+                    )
+                }
             }
         }
     }

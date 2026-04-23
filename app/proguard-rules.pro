@@ -1,21 +1,17 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# OkHttp
+-dontwarn okhttp3.internal.platform.**
+-dontwarn org.conscrypt.**
+-dontwarn org.bouncycastle.**
+-dontwarn org.openjsse.**
+-keep class okhttp3.** { *; }
+-keep interface okhttp3.** { *; }
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# Coil
+-keep class coil.** { *; }
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# Keep Kotlin metadata for reflection used by libraries
+-keep class kotlin.Metadata { *; }
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# Keep line numbers for better crash reports
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile

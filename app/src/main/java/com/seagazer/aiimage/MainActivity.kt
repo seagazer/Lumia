@@ -1,7 +1,7 @@
 package com.seagazer.aiimage
 
+import android.app.Activity
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -24,8 +25,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.ImageLoader
+import coil.compose.LocalImageLoader
+import coil.disk.DiskCache
+import coil.memory.MemoryCache
 import com.seagazer.aiimage.domain.ResultDetail
 import com.seagazer.aiimage.ui.components.EtherealBottomBar
 import com.seagazer.aiimage.ui.components.EtherealTab
@@ -42,18 +48,40 @@ import com.seagazer.aiimage.ui.gallery.RecycleBinScreen
 import com.seagazer.aiimage.ui.result.ResultDetailScreen
 import com.seagazer.aiimage.ui.settings.SettingsScreen
 import com.seagazer.aiimage.ui.theme.AIImageTheme
+import com.seagazer.aiimage.util.AppLocale
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
+
+    private val imageLoader: ImageLoader by lazy {
+        ImageLoader.Builder(this)
+            .memoryCache {
+                MemoryCache.Builder(this)
+                    .maxSizePercent(0.25)
+                    .build()
+            }
+            .diskCache {
+                DiskCache.Builder()
+                    .directory(cacheDir.resolve("coil_cache"))
+                    .maxSizeBytes(128L * 1024 * 1024)
+                    .build()
+            }
+            .crossfade(true)
+            .build()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        AppLocale.applyFromPreferences(applicationContext)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            val vm: MainViewModel = viewModel()
-            val themeDark by vm.themeDark.collectAsStateWithLifecycle()
-            AIImageTheme(darkTheme = themeDark) {
-                EtherealApp(vm = vm)
+            CompositionLocalProvider(LocalImageLoader provides imageLoader) {
+                val vm: MainViewModel = viewModel()
+                val themeDark by vm.themeDark.collectAsStateWithLifecycle()
+                AIImageTheme(darkTheme = themeDark) {
+                    EtherealApp(vm = vm)
+                }
             }
         }
     }
@@ -69,10 +97,6 @@ private fun EtherealApp(vm: MainViewModel) {
     val generationProgress by vm.generationProgressPercent.collectAsStateWithLifecycle()
     val galleryItems by vm.gallery.collectAsStateWithLifecycle()
     val recycleBinItems by vm.recycleBin.collectAsStateWithLifecycle()
-    val netErr by vm.showNetworkError.collectAsStateWithLifecycle()
-    val netErrDetail by vm.networkErrorDetail.collectAsStateWithLifecycle()
-    val genFail by vm.showGenerationFailed.collectAsStateWithLifecycle()
-    val genFailDetail by vm.generationFailedDetail.collectAsStateWithLifecycle()
     val themeDark by vm.themeDark.collectAsStateWithLifecycle()
     val resultFromGallery by vm.resultFromGallery.collectAsStateWithLifecycle()
     val resultFromPrivateSpace by vm.resultFromPrivateSpace.collectAsStateWithLifecycle()
@@ -82,16 +106,11 @@ private fun EtherealApp(vm: MainViewModel) {
     val dailyGenCap = vm.dailyGenerationsCap
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    /** Survives opening result/detail so the grid does not jump to top after delete/back. */
     val galleryLazyGridState = rememberLazyGridState()
     var resultImageFullscreen by remember { mutableStateOf(false) }
     var showRecycleBin by rememberSaveable { mutableStateOf(false) }
     var showPrivateSpace by rememberSaveable { mutableStateOf(false) }
     var galleryScrollToItemId by remember { mutableStateOf<String?>(null) }
-
-    var showSetPasswordDialog by remember { mutableStateOf(false) }
-    var showEnterPasswordDialog by remember { mutableStateOf(false) }
-    /** Tracks what should happen after a successful password flow. */
     var pendingPrivateAction by remember { mutableStateOf<PrivateAction?>(null) }
 
     LaunchedEffect(result) {
@@ -118,78 +137,34 @@ private fun EtherealApp(vm: MainViewModel) {
         }
     }
 
-    NetworkErrorDialog(
-        visible = netErr,
-        detail = netErrDetail,
-        onRetry = { vm.showNetworkError(false) },
-        onCancel = { vm.showNetworkError(false) },
-    )
-    GenerationFailedDialog(
-        visible = genFail,
-        detail = genFailDetail,
-        onTryAgain = {
-            vm.showGenerationFailed(false)
+    val onPrivateActionCompleted: (PrivateAction?) -> Unit = { action ->
+        when (action) {
+            is PrivateAction.MoveToPrivate -> {
+                vm.moveGalleryItemToPrivateSpace(action.itemId)
+                Toast.makeText(context, context.getString(R.string.moved_to_private_space), Toast.LENGTH_SHORT).show()
+            }
+            PrivateAction.OpenPrivateSpace -> showPrivateSpace = true
+            null -> {}
+        }
+        pendingPrivateAction = null
+    }
+
+    fun requestPrivateAction(action: PrivateAction) {
+        pendingPrivateAction = action
+    }
+
+    AppDialogHost(
+        vm = vm,
+        generating = generating && result == null,
+        generationProgress = generationProgress,
+        pendingPrivateAction = pendingPrivateAction,
+        onPrivateActionCompleted = onPrivateActionCompleted,
+        onDismissPrivateAction = { pendingPrivateAction = null },
+        onRetryGeneration = {
             scope.launch {
                 delay(300)
                 vm.generateArt { d -> if (d != null) vm.openResultFromGeneration(d) }
             }
-        },
-        onDismiss = { vm.showGenerationFailed(false) },
-    )
-
-    LumiaGeneratingDialog(
-        visible = generating && result == null,
-        title = stringResource(R.string.generating_title),
-        progressPercent = generationProgress,
-        onCancel = { vm.cancelGeneration() },
-    )
-
-    SetPrivatePasswordDialog(
-        visible = showSetPasswordDialog,
-        onConfirm = { password ->
-            vm.setPrivatePassword(password)
-            showSetPasswordDialog = false
-            when (pendingPrivateAction) {
-                is PrivateAction.MoveToPrivate -> {
-                    val id = (pendingPrivateAction as PrivateAction.MoveToPrivate).itemId
-                    vm.moveGalleryItemToPrivateSpace(id)
-                    Toast.makeText(context, context.getString(R.string.moved_to_private_space), Toast.LENGTH_SHORT).show()
-                }
-                PrivateAction.OpenPrivateSpace -> {
-                    showPrivateSpace = true
-                }
-                null -> {}
-            }
-            pendingPrivateAction = null
-        },
-        onDismiss = {
-            showSetPasswordDialog = false
-            pendingPrivateAction = null
-        },
-    )
-
-    EnterPrivatePasswordDialog(
-        visible = showEnterPasswordDialog,
-        onConfirm = { password ->
-            if (vm.verifyPrivatePassword(password)) {
-                showEnterPasswordDialog = false
-                when (pendingPrivateAction) {
-                    is PrivateAction.MoveToPrivate -> {
-                        val id = (pendingPrivateAction as PrivateAction.MoveToPrivate).itemId
-                        vm.moveGalleryItemToPrivateSpace(id)
-                        Toast.makeText(context, context.getString(R.string.moved_to_private_space), Toast.LENGTH_SHORT).show()
-                    }
-                    PrivateAction.OpenPrivateSpace -> {
-                        showPrivateSpace = true
-                    }
-                    null -> {}
-                }
-                pendingPrivateAction = null
-            }
-        },
-        onDismiss = {
-            showEnterPasswordDialog = false
-            pendingPrivateAction = null
         },
     )
 
@@ -220,68 +195,29 @@ private fun EtherealApp(vm: MainViewModel) {
         Box(Modifier.fillMaxSize().padding(padding)) {
             Crossfade(targetState = result, label = "root") { res ->
                 when (res) {
-                    null -> {
-                        when (tab) {
-                            EtherealTab.Create -> CreateScreen(
-                                viewModel = vm,
-                                prompt = prompt,
-                                generating = generating,
-                                onPromptChange = vm::setPrompt,
-                                onGenerate = {
-                                    vm.generateArt { detail ->
-                                        if (detail != null) {
-                                            vm.openResultFromGeneration(detail)
-                                            tab = EtherealTab.Gallery
-                                        }
-                                    }
-                                },
-                            )
-
-                            EtherealTab.Gallery -> when {
-                                showPrivateSpace -> PrivateSpaceScreen(
-                                    items = privateSpaceItems,
-                                    onBack = { showPrivateSpace = false },
-                                    onOpenItem = { vm.openResultFromPrivateSpace(it) },
-                                )
-                                showRecycleBin -> RecycleBinScreen(
-                                    items = recycleBinItems,
-                                    onBack = { showRecycleBin = false },
-                                    onRestore = {
-                                        vm.restoreRecycleBinItem(it.id)
-                                        galleryScrollToItemId = it.id
-                                    },
-                                    onPermanentDelete = { vm.permanentlyDeleteRecycleBinItem(it.id) },
-                                )
-                                else -> GalleryScreen(
-                                    items = galleryItems,
-                                    lazyGridState = galleryLazyGridState,
-                                    onOpenItem = { vm.openResultFromGallery(it) },
-                                    onOpenRecycleBin = { showRecycleBin = true },
-                                    onOpenPrivateSpace = {
-                                        if (!vm.isPrivatePasswordSet()) {
-                                            pendingPrivateAction = PrivateAction.OpenPrivateSpace
-                                            showSetPasswordDialog = true
-                                        } else {
-                                            pendingPrivateAction = PrivateAction.OpenPrivateSpace
-                                            showEnterPasswordDialog = true
-                                        }
-                                    },
-                                    scrollToItemId = galleryScrollToItemId,
-                                    onScrollToItemConsumed = { galleryScrollToItemId = null },
-                                )
-                            }
-
-                            EtherealTab.Settings -> SettingsScreen(
-                                themeDark = themeDark,
-                                comfyBaseUrl = comfyUrl,
-                                dailyGenerationsUsed = dailyGenUsed,
-                                dailyGenerationsMax = dailyGenCap,
-                                onThemeDarkChange = vm::setThemeDark,
-                                onComfyUrlChange = vm::setComfyBaseUrl,
-                                onClearCache = { vm.clearAppCaches() },
-                            )
-                        }
-                    }
+                    null -> TabContent(
+                        tab = tab,
+                        vm = vm,
+                        prompt = prompt,
+                        generating = generating,
+                        galleryItems = galleryItems,
+                        recycleBinItems = recycleBinItems,
+                        privateSpaceItems = privateSpaceItems,
+                        showPrivateSpace = showPrivateSpace,
+                        showRecycleBin = showRecycleBin,
+                        galleryLazyGridState = galleryLazyGridState,
+                        galleryScrollToItemId = galleryScrollToItemId,
+                        themeDark = themeDark,
+                        comfyUrl = comfyUrl,
+                        dailyGenUsed = dailyGenUsed,
+                        dailyGenCap = dailyGenCap,
+                        onTabChange = { tab = it },
+                        onShowRecycleBin = { showRecycleBin = it },
+                        onShowPrivateSpace = { showPrivateSpace = it },
+                        onScrollToItemConsumed = { galleryScrollToItemId = null },
+                        onScrollToItem = { galleryScrollToItemId = it },
+                        onRequestPrivateAction = ::requestPrivateAction,
+                    )
 
                     else -> ResultPane(
                         detail = res,
@@ -292,8 +228,7 @@ private fun EtherealApp(vm: MainViewModel) {
                         onImageFullscreenChange = { resultImageFullscreen = it },
                         onRequestMoveToPrivate = { id ->
                             if (!vm.isPrivatePasswordSet()) {
-                                pendingPrivateAction = PrivateAction.MoveToPrivate(id)
-                                showSetPasswordDialog = true
+                                requestPrivateAction(PrivateAction.MoveToPrivate(id))
                             } else {
                                 vm.moveGalleryItemToPrivateSpace(id)
                                 Toast.makeText(context, context.getString(R.string.moved_to_private_space), Toast.LENGTH_SHORT).show()
@@ -307,6 +242,156 @@ private fun EtherealApp(vm: MainViewModel) {
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun AppDialogHost(
+    vm: MainViewModel,
+    generating: Boolean,
+    generationProgress: Int?,
+    pendingPrivateAction: PrivateAction?,
+    onPrivateActionCompleted: (PrivateAction?) -> Unit,
+    onDismissPrivateAction: () -> Unit,
+    onRetryGeneration: () -> Unit,
+) {
+    val netErr by vm.showNetworkError.collectAsStateWithLifecycle()
+    val netErrDetail by vm.networkErrorDetail.collectAsStateWithLifecycle()
+    val genFail by vm.showGenerationFailed.collectAsStateWithLifecycle()
+    val genFailDetail by vm.generationFailedDetail.collectAsStateWithLifecycle()
+
+    NetworkErrorDialog(
+        visible = netErr,
+        detail = netErrDetail,
+        onRetry = { vm.showNetworkError(false) },
+        onCancel = { vm.showNetworkError(false) },
+    )
+    GenerationFailedDialog(
+        visible = genFail,
+        detail = genFailDetail,
+        onTryAgain = {
+            vm.showGenerationFailed(false)
+            onRetryGeneration()
+        },
+        onDismiss = { vm.showGenerationFailed(false) },
+    )
+    LumiaGeneratingDialog(
+        visible = generating,
+        title = stringResource(R.string.generating_title),
+        progressPercent = generationProgress,
+        onCancel = { vm.cancelGeneration() },
+    )
+
+    val showSet = pendingPrivateAction != null && !vm.isPrivatePasswordSet()
+    val showEnter = pendingPrivateAction != null && vm.isPrivatePasswordSet()
+
+    SetPrivatePasswordDialog(
+        visible = showSet,
+        onConfirm = { password ->
+            vm.setPrivatePassword(password)
+            onPrivateActionCompleted(pendingPrivateAction)
+        },
+        onDismiss = onDismissPrivateAction,
+    )
+    EnterPrivatePasswordDialog(
+        visible = showEnter,
+        onConfirm = { password ->
+            if (vm.verifyPrivatePassword(password)) {
+                onPrivateActionCompleted(pendingPrivateAction)
+            }
+        },
+        onDismiss = onDismissPrivateAction,
+    )
+}
+
+@Composable
+private fun TabContent(
+    tab: EtherealTab,
+    vm: MainViewModel,
+    prompt: String,
+    generating: Boolean,
+    galleryItems: List<com.seagazer.aiimage.domain.GalleryItem>,
+    recycleBinItems: List<com.seagazer.aiimage.domain.GalleryItem>,
+    privateSpaceItems: List<com.seagazer.aiimage.domain.GalleryItem>,
+    showPrivateSpace: Boolean,
+    showRecycleBin: Boolean,
+    galleryLazyGridState: androidx.compose.foundation.lazy.grid.LazyGridState,
+    galleryScrollToItemId: String?,
+    themeDark: Boolean,
+    comfyUrl: String,
+    dailyGenUsed: Int,
+    dailyGenCap: Int,
+    onTabChange: (EtherealTab) -> Unit,
+    onShowRecycleBin: (Boolean) -> Unit,
+    onShowPrivateSpace: (Boolean) -> Unit,
+    onScrollToItemConsumed: () -> Unit,
+    onScrollToItem: (String) -> Unit,
+    onRequestPrivateAction: (PrivateAction) -> Unit,
+) {
+    val context = LocalContext.current
+    val appLanguage by vm.appLanguage.collectAsStateWithLifecycle()
+    when (tab) {
+        EtherealTab.Create -> CreateScreen(
+            viewModel = vm,
+            prompt = prompt,
+            generating = generating,
+            onPromptChange = vm::setPrompt,
+            onGenerate = {
+                vm.generateArt { detail ->
+                    if (detail != null) {
+                        vm.openResultFromGeneration(detail)
+                        onTabChange(EtherealTab.Gallery)
+                    }
+                }
+            },
+        )
+
+        EtherealTab.Gallery -> when {
+            showPrivateSpace -> PrivateSpaceScreen(
+                items = privateSpaceItems,
+                onBack = { onShowPrivateSpace(false) },
+                onOpenItem = { vm.openResultFromPrivateSpace(it) },
+            )
+            showRecycleBin -> RecycleBinScreen(
+                items = recycleBinItems,
+                onBack = { onShowRecycleBin(false) },
+                onRestore = {
+                    vm.restoreRecycleBinItem(it.id)
+                    onScrollToItem(it.id)
+                },
+                onPermanentDelete = { vm.permanentlyDeleteRecycleBinItem(it.id) },
+            )
+            else -> GalleryScreen(
+                items = galleryItems,
+                lazyGridState = galleryLazyGridState,
+                onOpenItem = { vm.openResultFromGallery(it) },
+                onOpenRecycleBin = { onShowRecycleBin(true) },
+                onOpenPrivateSpace = {
+                    onRequestPrivateAction(PrivateAction.OpenPrivateSpace)
+                },
+                scrollToItemId = galleryScrollToItemId,
+                onScrollToItemConsumed = onScrollToItemConsumed,
+            )
+        }
+
+        EtherealTab.Settings -> SettingsScreen(
+            themeDark = themeDark,
+            appLanguage = appLanguage,
+            comfyBaseUrl = comfyUrl,
+            dailyGenerationsUsed = dailyGenUsed,
+            dailyGenerationsMax = dailyGenCap,
+            onThemeDarkChange = vm::setThemeDark,
+            onAppLanguageChange = change@{ option ->
+                if (option == appLanguage) return@change
+                vm.setAppLanguage(option)
+                val act = context as? Activity ?: return@change
+                act.window.decorView.post {
+                    if (!act.isFinishing) act.recreate()
+                }
+            },
+            onComfyUrlChange = vm::setComfyBaseUrl,
+            onClearCache = { vm.clearAppCaches() },
+        )
     }
 }
 

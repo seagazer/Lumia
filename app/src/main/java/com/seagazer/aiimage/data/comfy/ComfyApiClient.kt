@@ -29,12 +29,7 @@ class ComfyApiClient(baseUrl: String) {
     private val apiRoot: HttpUrl = baseUrl.trimEnd('/').toHttpUrlOrNull()
         ?: throw IllegalArgumentException("Invalid ComfyUI base URL")
 
-    private val client: OkHttpClient = OkHttpClient.Builder()
-        .connectTimeout(30, TimeUnit.SECONDS)
-        .readTimeout(120, TimeUnit.SECONDS)
-        .writeTimeout(60, TimeUnit.SECONDS)
-        .callTimeout(300, TimeUnit.SECONDS)
-        .build()
+    private val client: OkHttpClient get() = sharedClient
 
     private fun urlSegments(vararg segments: String): HttpUrl {
         val b = apiRoot.newBuilder()
@@ -171,21 +166,26 @@ class ComfyApiClient(baseUrl: String) {
 
     /**
      * Poll history until an image appears or [maxWaitMs] elapsed.
+     * Uses exponential backoff: starts at [initialIntervalMs], doubles each miss, caps at [maxIntervalMs].
      */
     suspend fun waitForFirstOutput(
         promptId: String,
-        pollIntervalMs: Long = 800L,
+        initialIntervalMs: Long = 800L,
+        maxIntervalMs: Long = 5_000L,
         maxWaitMs: Long = 360_000L,
     ): ComfyOutputImage = withContext(Dispatchers.IO) {
         val deadline = System.currentTimeMillis() + maxWaitMs
         var last: JSONObject? = null
+        var interval = initialIntervalMs
         while (System.currentTimeMillis() < deadline) {
             last = runCatching { fetchHistorySnapshot(promptId) }.getOrNull()
             if (last != null) {
                 val img = extractFirstImage(last)
                 if (img != null) return@withContext img
+                interval = initialIntervalMs
             }
-            delay(pollIntervalMs)
+            delay(interval)
+            interval = min(interval * 2, maxIntervalMs)
         }
         throw ComfyApiException(
             504,
@@ -206,6 +206,15 @@ class ComfyApiClient(baseUrl: String) {
     }
 
     companion object {
+        private val sharedClient: OkHttpClient by lazy {
+            OkHttpClient.Builder()
+                .connectTimeout(30, TimeUnit.SECONDS)
+                .readTimeout(120, TimeUnit.SECONDS)
+                .writeTimeout(60, TimeUnit.SECONDS)
+                .callTimeout(300, TimeUnit.SECONDS)
+                .build()
+        }
+
         private val JSON_MEDIA = "application/json; charset=utf-8".toMediaType()
 
         /**

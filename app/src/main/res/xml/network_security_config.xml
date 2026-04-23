@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
-    <!-- ComfyUI on LAN often uses HTTP; for public internet use HTTPS + a proxy -->
+    <!--
+        Cleartext (HTTP) is permitted because ComfyUI typically runs on the local network
+        without TLS. The user configures the server address in Settings. When connecting
+        over the public internet, users should use HTTPS via a reverse proxy.
+    -->
     <base-config cleartextTrafficPermitted="true" />
 </network-security-config>

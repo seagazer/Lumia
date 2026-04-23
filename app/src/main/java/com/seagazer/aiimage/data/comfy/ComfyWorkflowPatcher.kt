@@ -29,6 +29,11 @@ object ComfyWorkflowPatcher {
         }.getOrDefault(false)
     }
 
+    private fun isUnetLoaderWorkflow(root: JSONObject): Boolean {
+        val n1 = root.optJSONObject(FP8_NODE_UNET) ?: return false
+        return n1.optString("class_type") == "UNETLoader"
+    }
+
     fun buildPromptGraph(
         templateJson: String,
         positivePrompt: String,
@@ -39,7 +44,7 @@ object ComfyWorkflowPatcher {
         vaeFileOverride: String? = null,
     ): JSONObject {
         val root = JSONObject(templateJson)
-        if (isUnetLoaderWorkflow(templateJson)) {
+        if (isUnetLoaderWorkflow(root)) {
             patchFp8Style(root, positivePrompt, settings, seed, primaryModelFileOverride, clipFileOverride, vaeFileOverride)
         } else {
             patchLegacySd15(root, positivePrompt, settings, seed, primaryModelFileOverride)
@@ -109,22 +114,16 @@ object ComfyWorkflowPatcher {
         }.getOrDefault("ComfyUI")
     }
 
-    private fun unetNameFromTemplate(templateJson: String): String {
-        return runCatching {
-            JSONObject(templateJson)
-                .getJSONObject(FP8_NODE_UNET)
-                .getJSONObject("inputs")
-                .getString("unet_name")
-        }.getOrDefault("UNET")
-    }
-
     fun effectiveCheckpointLabel(templateJson: String, primaryOverride: String?): String {
         val o = primaryOverride?.trim().orEmpty()
         if (o.isNotEmpty()) return o
-        return if (isUnetLoaderWorkflow(templateJson)) {
-            unetNameFromTemplate(templateJson)
-        } else {
-            checkpointNameFromTemplate(templateJson)
-        }
+        return runCatching {
+            val root = JSONObject(templateJson)
+            if (isUnetLoaderWorkflow(root)) {
+                root.getJSONObject(FP8_NODE_UNET).getJSONObject("inputs").getString("unet_name")
+            } else {
+                root.getJSONObject(LEGACY_NODE_CHECKPOINT).getJSONObject("inputs").getString("ckpt_name")
+            }
+        }.getOrDefault("ComfyUI")
     }
 }

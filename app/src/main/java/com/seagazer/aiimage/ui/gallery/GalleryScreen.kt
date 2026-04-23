@@ -334,7 +334,7 @@ private fun ResolutionFilterDropdown(
 }
 
 private fun Modifier.borderGhost(): Modifier =
-    border(1.dp, LumiaDesign.GhostBorderLight, RoundedCornerShape(LumiaDesign.radiusLg))
+    this.border(1.dp, LumiaDesign.GhostBorderLight, RoundedCornerShape(LumiaDesign.radiusLg))
 
 @Composable
 private fun GalleryGridCard(

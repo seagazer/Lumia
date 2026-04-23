@@ -119,6 +119,11 @@
     <string name="resolution_pixels_label">PIXELS</string>
     <string name="settings_page_subtitle">Manage your atelier preferences and account data.</string>
     <string name="theme_switch_subtitle">Switch between Dark and Light mode</string>
+    <string name="language">Language</string>
+    <string name="language_system">System default</string>
+    <string name="language_english">English</string>
+    <string name="language_chinese">Chinese (Simplified)</string>
+    <string name="language_picker_title">Choose language</string>
     <string name="clear_cache_subtitle_design">Free up space by removing temporary data</string>
     <string name="premium_artisan">Premium Artisan</string>
     <string name="pro_account">Pro Account</string>

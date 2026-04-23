@@ -24,7 +24,8 @@ android {
             buildConfigField("String", "DEFAULT_COMFY_BASE_URL", "\"http://10.0.2.2:8188\"")
         }
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -47,6 +48,7 @@ android {
 
 dependencies {
 
+    implementation(libs.androidx.appcompat)
     implementation(libs.android.material)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

@@ -1,11 +1,13 @@
 package com.seagazer.aiimage.data.local
 
 import android.content.Context
+import com.seagazer.aiimage.domain.AppLanguageOption
 import com.seagazer.aiimage.domain.GalleryItem
 import com.seagazer.aiimage.domain.GenerationSettings
 import com.seagazer.aiimage.domain.ImageQuality
 import org.json.JSONArray
 import org.json.JSONObject
+import java.security.MessageDigest
 import java.time.LocalDate
 
 object AppPreferences {
@@ -26,6 +28,7 @@ object AppPreferences {
     private const val KEY_DAILY_GEN_COUNT = "daily_gen_count_v1"
     private const val KEY_PRIVATE_SPACE = "private_space_json_v1"
     private const val KEY_PRIVATE_PASSWORD = "private_space_password"
+    private const val KEY_APP_LANGUAGE = "app_language_v1"
 
     /** TODO: Max ComfyUI generation requests per calendar day (each request counts once). */
     const val MAX_DAILY_GENERATIONS = 500
@@ -57,6 +60,15 @@ object AppPreferences {
 
     fun saveThemeDark(ctx: Context, value: Boolean) {
         sp(ctx).edit().putBoolean(KEY_THEME_DARK, value).apply()
+    }
+
+    fun loadAppLanguage(ctx: Context): AppLanguageOption {
+        val raw = sp(ctx).getString(KEY_APP_LANGUAGE, null) ?: return AppLanguageOption.System
+        return runCatching { AppLanguageOption.valueOf(raw) }.getOrDefault(AppLanguageOption.System)
+    }
+
+    fun saveAppLanguage(ctx: Context, option: AppLanguageOption) {
+        sp(ctx).edit().putString(KEY_APP_LANGUAGE, option.name).apply()
     }
 
     fun loadComfyUrl(ctx: Context, defaultUrl: String) =
@@ -170,15 +182,23 @@ object AppPreferences {
         sp(ctx).edit().putString(KEY_PRIVATE_SPACE, galleryToJson(items)).apply()
     }
 
-    fun loadPrivatePassword(ctx: Context): String? =
-        sp(ctx).getString(KEY_PRIVATE_PASSWORD, null)
+    fun verifyPrivatePassword(ctx: Context, password: String): Boolean {
+        val storedHash = sp(ctx).getString(KEY_PRIVATE_PASSWORD, null) ?: return false
+        return hashPassword(password) == storedHash
+    }
 
     fun savePrivatePassword(ctx: Context, password: String) {
-        sp(ctx).edit().putString(KEY_PRIVATE_PASSWORD, password).apply()
+        sp(ctx).edit().putString(KEY_PRIVATE_PASSWORD, hashPassword(password)).apply()
     }
 
     fun isPrivatePasswordSet(ctx: Context): Boolean =
         !sp(ctx).getString(KEY_PRIVATE_PASSWORD, null).isNullOrEmpty()
+
+    private fun hashPassword(password: String): String {
+        val digest = MessageDigest.getInstance("SHA-256")
+        val hashBytes = digest.digest(password.toByteArray(Charsets.UTF_8))
+        return hashBytes.joinToString("") { "%02x".format(it) }
+    }
 
     private fun galleryToJson(items: List<GalleryItem>): String {
         val arr = JSONArray()
