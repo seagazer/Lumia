@@ -68,6 +68,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _resultFromPrivateSpace = MutableStateFlow(false)
     val resultFromPrivateSpace: StateFlow<Boolean> = _resultFromPrivateSpace.asStateFlow()
 
+    private val _resultDetailItems = MutableStateFlow<List<ResultDetail>>(emptyList())
+    val resultDetailItems: StateFlow<List<ResultDetail>> = _resultDetailItems.asStateFlow()
+
+    private val _resultDetailIndex = MutableStateFlow(0)
+    val resultDetailIndex: StateFlow<Int> = _resultDetailIndex.asStateFlow()
+
     private val _resultDetail = MutableStateFlow<ResultDetail?>(null)
     val resultDetail: StateFlow<ResultDetail?> = _resultDetail.asStateFlow()
 
@@ -259,33 +265,65 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         if (!value) _generationFailedDetail.value = null
     }
 
-    fun openResultFromGallery(item: GalleryItem) {
-        _resultFromGallery.value = true
-        _resultFromPrivateSpace.value = false
-        _resultBottomTabGallery.value = true
-        val prompt = item.prompt.ifBlank { item.caption ?: "" }
-        _resultDetail.value = ResultDetail(
-            id = item.id,
-            imageUrl = item.imageUrl,
-            prompt = prompt,
-            modelLabel = item.modelLabel.ifBlank { "ComfyUI" },
-            seed = item.seed.ifBlank { "—" },
-            sampling = item.sampling.ifBlank { "—" },
-            steps = item.steps.ifBlank { "—" },
-            width = item.width,
-            height = item.height,
-        )
+    fun openResultFromGallery(items: List<GalleryItem>, item: GalleryItem) {
+        openResultFromGalleryContext(items = items, item = item, fromPrivateSpace = false)
+    }
+
+    fun openResultFromPrivateSpace(items: List<GalleryItem>, item: GalleryItem) {
+        openResultFromGalleryContext(items = items, item = item, fromPrivateSpace = true)
+    }
+
+    fun updateResultDetailIndex(index: Int) {
+        val items = _resultDetailItems.value
+        if (items.isEmpty()) return
+        val safeIndex = index.coerceIn(items.indices)
+        _resultDetailIndex.value = safeIndex
+        _resultDetail.value = items[safeIndex]
     }
 
     fun openResultFromGeneration(detail: ResultDetail) {
         _resultFromGallery.value = false
         _resultFromPrivateSpace.value = false
         _resultBottomTabGallery.value = true
+        _resultDetailItems.value = emptyList()
+        _resultDetailIndex.value = 0
         _resultDetail.value = detail
     }
 
     fun clearResult() {
         _resultDetail.value = null
+        _resultDetailItems.value = emptyList()
+        _resultDetailIndex.value = 0
+    }
+
+    private fun openResultFromGalleryContext(
+        items: List<GalleryItem>,
+        item: GalleryItem,
+        fromPrivateSpace: Boolean,
+    ) {
+        _resultFromGallery.value = true
+        _resultFromPrivateSpace.value = fromPrivateSpace
+        _resultBottomTabGallery.value = true
+        val details = items.map { it.toResultDetail() }
+        val index = details.indexOfFirst { it.id == item.id }.takeIf { it >= 0 } ?: 0
+        _resultDetailItems.value = details
+        _resultDetailIndex.value = index
+        _resultDetail.value = details.getOrNull(index) ?: item.toResultDetail()
+    }
+
+    private fun GalleryItem.toResultDetail(): ResultDetail {
+        val promptText = prompt.ifBlank { caption ?: "" }
+        return ResultDetail(
+            id = id,
+            imageUrl = imageUrl,
+            prompt = promptText,
+            modelLabel = modelLabel.ifBlank { "ComfyUI" },
+            seed = seed.ifBlank { "—" },
+            sampling = sampling.ifBlank { "—" },
+            steps = steps.ifBlank { "—" },
+            width = width,
+            height = height,
+        )
     }
 
     fun cancelGeneration() {
@@ -333,24 +371,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun setPrivatePassword(password: String) {
         AppPreferences.savePrivatePassword(getApplication(), password)
-    }
-
-    fun openResultFromPrivateSpace(item: GalleryItem) {
-        _resultFromGallery.value = true
-        _resultFromPrivateSpace.value = true
-        _resultBottomTabGallery.value = true
-        val prompt = item.prompt.ifBlank { item.caption ?: "" }
-        _resultDetail.value = ResultDetail(
-            id = item.id,
-            imageUrl = item.imageUrl,
-            prompt = prompt,
-            modelLabel = item.modelLabel.ifBlank { "ComfyUI" },
-            seed = item.seed.ifBlank { "—" },
-            sampling = item.sampling.ifBlank { "—" },
-            steps = item.steps.ifBlank { "—" },
-            width = item.width,
-            height = item.height,
-        )
     }
 
     fun moveGalleryItemToPrivateSpace(id: String) {

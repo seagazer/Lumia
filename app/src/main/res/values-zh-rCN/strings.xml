@@ -20,7 +20,7 @@
     <string name="resolution">分辨率</string>
     <string name="resolution_width">宽度</string>
     <string name="resolution_height">高度</string>
-    <string name="resolution_max_exceeded_toast">宽度和高度不能超过 1024 像素。</string>
+    <string name="resolution_max_exceeded_toast">宽度和高度不能超过 16384 像素。</string>
     <string name="unit_px">像素</string>
     <string name="image_quality">图像质量</string>
     <string name="sampler_method">采样器</string>
@@ -44,7 +44,7 @@
     <string name="pro_member">专业会员</string>
     <string name="edit_profile">编辑资料</string>
     <string name="subscription">订阅</string>
-    <string name="comfy_connection">ComfyUI 连接</string>
+    <string name="comfy_connection">服务器设置</string>
     <string name="base_url">基础地址</string>
     <string name="base_url_hint">使用本机 IPv4（ipconfig），例如 http://192.168.1.105:8188。默认 192.168.1.1 多为路由器而非 ComfyUI。安卓模拟器访问本机：http://10.0.2.2:8188。请用 --listen 启动 ComfyUI 以便局域网连接。</string>
     <string name="checkpoint_file">UNET / 模型文件</string>
@@ -112,10 +112,10 @@
 
     <string name="creation_page_title">创作</string>
     <string name="creation_page_subtitle">用我们的生成引擎，将想象化为惊艳的数字画面。</string>
-    <string name="generate_masterpiece">生成杰作</string>
+    <string name="generate_masterpiece">开始创作</string>
     <string name="parameters">参数</string>
     <string name="engine_configuration">引擎配置</string>
-    <string name="confirm_settings">确认设置</string>
+    <string name="confirm_settings">确认配置</string>
     <string name="saved_to_local_profile">已保存到本地配置</string>
     <string name="resolution_pixels_label">像素</string>
     <string name="settings_page_subtitle">管理工作室偏好与账户相关数据。</string>
@@ -130,7 +130,7 @@
     <string name="pro_account">专业账户</string>
     <string name="daily_generations">每日生成次数</string>
     <string name="daily_generations_count">%1$d / %2$d</string>
-    <string name="daily_generation_limit_reached">今日生成次数已达上限。</string>
+    <string name="daily_generation_limit_reached">生成次数已达上限。</string>
     <string name="legal_statement">法律声明</string>
     <string name="lumia_os_build">LUMIA-OS_BUILD:</string>
     <string name="gallery_page_title">图库</string>
@@ -149,7 +149,10 @@
     <string name="filter_resolution">分辨率</string>
     <string name="resolution_preset_all">全部</string>
     <string name="gallery_resolution_unknown">未知尺寸</string>
-    <string name="generating_title">Lumia 正在为你绘制…</string>
+    <string name="notification_channel_generation_name">图像生成</string>
+    <string name="notification_channel_generation_desc">生成图片时在通知栏显示进度</string>
+    <string name="notification_generating_waiting_progress">正在准备或等待 ComfyUI 进度…</string>
+    <string name="generating_title">Lumia 正在为你创作…</string>
     <string name="generating_subtitle">预计耗时：约 30 秒</string>
     <string name="generating_progress_percent">%1$d%%</string>
     <string name="confirm_deletion_title">确认删除</string>
@@ -163,7 +166,7 @@
     <string name="quality">画质</string>
     <string name="seed">种子</string>
     <string name="prompt_applied">已应用提示词</string>
-    <string name="share_masterpiece">分享杰作</string>
+    <string name="share_masterpiece">分享作品</string>
     <string name="save_to_device_upper">保存到设备</string>
     <string name="image_saved_banner">图片已成功保存到系统相册</string>
     <string name="metadata_model">模型</string>

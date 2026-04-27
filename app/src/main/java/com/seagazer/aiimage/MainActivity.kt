@@ -1,6 +1,9 @@
 package com.seagazer.aiimage
 
+import android.Manifest
 import android.app.Activity
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -15,6 +18,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -23,6 +27,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -49,6 +59,7 @@ import com.seagazer.aiimage.ui.result.ResultDetailScreen
 import com.seagazer.aiimage.ui.settings.SettingsScreen
 import com.seagazer.aiimage.ui.theme.AIImageTheme
 import com.seagazer.aiimage.util.AppLocale
+import com.seagazer.aiimage.util.GenerationProgressNotification
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -88,9 +99,69 @@ class MainActivity : AppCompatActivity() {
 }
 
 @Composable
+private fun GenerationBackgroundNotificationEffect(
+    generating: Boolean,
+    progressPercent: Int?,
+) {
+    val context = LocalContext.current
+    var inBackground by remember { mutableStateOf(false) }
+    var notifPermTick by remember { mutableStateOf(0) }
+    val postNotifLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { notifPermTick++ }
+
+    DisposableEffect(Unit) {
+        val owner = ProcessLifecycleOwner.get()
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_STOP -> inBackground = true
+                Lifecycle.Event.ON_START -> inBackground = false
+                else -> {}
+            }
+        }
+        owner.lifecycle.addObserver(observer)
+        onDispose { owner.lifecycle.removeObserver(observer) }
+    }
+
+    var prevGenerating by remember { mutableStateOf(false) }
+    LaunchedEffect(generating) {
+        if (generating && !prevGenerating) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                val ok = ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.POST_NOTIFICATIONS,
+                ) == PackageManager.PERMISSION_GRANTED
+                if (!ok) {
+                    postNotifLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
+            }
+        }
+        prevGenerating = generating
+    }
+
+    LaunchedEffect(generating, inBackground, progressPercent, notifPermTick) {
+        val canPost = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            true
+        } else {
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.POST_NOTIFICATIONS,
+            ) == PackageManager.PERMISSION_GRANTED
+        }
+        if (generating && inBackground && canPost) {
+            GenerationProgressNotification.showOrUpdate(context, progressPercent)
+        } else {
+            GenerationProgressNotification.cancel(context)
+        }
+    }
+}
+
+@Composable
 private fun EtherealApp(vm: MainViewModel) {
     var tab by rememberSaveable { mutableStateOf(EtherealTab.Create) }
     val result by vm.resultDetail.collectAsStateWithLifecycle()
+    val resultItems by vm.resultDetailItems.collectAsStateWithLifecycle()
+    val resultIndex by vm.resultDetailIndex.collectAsStateWithLifecycle()
     val resultTabGallery by vm.resultBottomTabGallery.collectAsStateWithLifecycle()
     val prompt by vm.prompt.collectAsStateWithLifecycle()
     val generating by vm.generating.collectAsStateWithLifecycle()
@@ -106,6 +177,11 @@ private fun EtherealApp(vm: MainViewModel) {
     val dailyGenCap = vm.dailyGenerationsCap
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+
+    GenerationBackgroundNotificationEffect(
+        generating = generating,
+        progressPercent = generationProgress,
+    )
     val galleryLazyGridState = rememberLazyGridState()
     var resultImageFullscreen by remember { mutableStateOf(false) }
     var showRecycleBin by rememberSaveable { mutableStateOf(false) }
@@ -221,6 +297,8 @@ private fun EtherealApp(vm: MainViewModel) {
 
                     else -> ResultPane(
                         detail = res,
+                        detailItems = resultItems,
+                        detailIndex = resultIndex,
                         vm = vm,
                         fromGallery = resultFromGallery,
                         isFromPrivateSpace = resultFromPrivateSpace,
@@ -350,7 +428,7 @@ private fun TabContent(
             showPrivateSpace -> PrivateSpaceScreen(
                 items = privateSpaceItems,
                 onBack = { onShowPrivateSpace(false) },
-                onOpenItem = { vm.openResultFromPrivateSpace(it) },
+                onOpenItem = { vm.openResultFromPrivateSpace(privateSpaceItems, it) },
             )
             showRecycleBin -> RecycleBinScreen(
                 items = recycleBinItems,
@@ -364,7 +442,7 @@ private fun TabContent(
             else -> GalleryScreen(
                 items = galleryItems,
                 lazyGridState = galleryLazyGridState,
-                onOpenItem = { vm.openResultFromGallery(it) },
+                onOpenItem = { vm.openResultFromGallery(galleryItems, it) },
                 onOpenRecycleBin = { onShowRecycleBin(true) },
                 onOpenPrivateSpace = {
                     onRequestPrivateAction(PrivateAction.OpenPrivateSpace)
@@ -398,6 +476,8 @@ private fun TabContent(
 @Composable
 private fun ResultPane(
     detail: ResultDetail,
+    detailItems: List<ResultDetail>,
+    detailIndex: Int,
     vm: MainViewModel,
     fromGallery: Boolean,
     isFromPrivateSpace: Boolean,
@@ -426,33 +506,36 @@ private fun ResultPane(
     }
     ResultDetailScreen(
         detail = detail,
+        detailItems = detailItems,
+        detailIndex = detailIndex,
         fromGallery = fromGallery,
         loadingImage = loadingImage,
         onBack = onDismissResult,
         onImageViewerVisibilityChanged = onImageFullscreenChange,
-        onSaveToGallery = {
-            val ok = vm.saveResultToPublicAlbum(detail.imageUrl)
+        onDetailIndexChange = vm::updateResultDetailIndex,
+        onSaveToGallery = { currentDetail ->
+            val ok = vm.saveResultToPublicAlbum(currentDetail.imageUrl)
             toastSave(ok, export = false)
             ok
         },
         onShare = { },
-        onExport = {
-            val ok = vm.saveResultToPublicAlbum(detail.imageUrl)
+        onExport = { currentDetail ->
+            val ok = vm.saveResultToPublicAlbum(currentDetail.imageUrl)
             toastSave(ok, export = true)
             ok
         },
         onDeleteFromGallery = if (fromGallery && !isFromPrivateSpace) {
-            { vm.moveGalleryItemToRecycleBin(detail.id) }
+            { currentDetail -> vm.moveGalleryItemToRecycleBin(currentDetail.id) }
         } else {
             null
         },
         isFromPrivateSpace = isFromPrivateSpace,
         onTogglePrivate = if (fromGallery) {
-            {
+            { currentDetail ->
                 if (isFromPrivateSpace) {
-                    onRequestRestoreFromPrivate(detail.id)
+                    onRequestRestoreFromPrivate(currentDetail.id)
                 } else {
-                    onRequestMoveToPrivate(detail.id)
+                    onRequestMoveToPrivate(currentDetail.id)
                 }
             }
         } else {

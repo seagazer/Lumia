@@ -61,13 +61,14 @@ import com.seagazer.aiimage.ui.theme.LumiaDesign
 import java.util.Locale
 
 private const val DimMin = 64
-private const val DimMax = 1024
+/** Upper bound for width/height in pixels (8-aligned; aligned value never exceeds this). */
+private const val DimMax = 16384
 
 private const val SeedMax = 4294967295L
 
 /** @return null if the numeric value would exceed [DimMax] (caller should toast and keep the current text). */
 private fun filteredResolutionDigits(proposed: String): String? {
-    val digits = proposed.filter { it.isDigit() }.take(4)
+    val digits = proposed.filter { it.isDigit() }.take(5)
     val n = digits.toIntOrNull()
     if (n != null && n > DimMax) return null
     return digits

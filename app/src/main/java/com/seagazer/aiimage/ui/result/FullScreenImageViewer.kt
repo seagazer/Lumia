@@ -37,8 +37,10 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.unit.IntSize
 import androidx.core.view.WindowCompat
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -99,6 +101,7 @@ fun FullScreenImageViewer(
 
     var scale by remember { mutableFloatStateOf(1f) }
     var offset by remember { mutableStateOf(Offset.Zero) }
+    var layoutSize by remember { mutableStateOf(IntSize.Zero) }
     val scaleForGestures = rememberUpdatedState(scale)
     val zoomAnimJob = remember { mutableStateOf<Job?>(null) }
     val scope = rememberCoroutineScope()
@@ -110,11 +113,24 @@ fun FullScreenImageViewer(
         offset = if (scale > 1f) offset + panChange else Offset.Zero
     }
 
-    fun animateZoomTo(targetScale: Float) {
+    fun layoutCenterOrNull(): Offset? {
+        if (layoutSize.width <= 0 || layoutSize.height <= 0) return null
+        return Offset(layoutSize.width / 2f, layoutSize.height / 2f)
+    }
+
+    fun animateZoomTo(targetScale: Float, doubleTapFocal: Offset? = null) {
         val t = targetScale.coerceIn(1f, 5f)
         val startScale = scale
         val startOffset = offset
-        if (abs(startScale - t) < 0.001f && abs(startOffset.x) < 0.01f && abs(startOffset.y) < 0.01f) return
+        val c = layoutCenterOrNull()
+        val useFocal = doubleTapFocal != null && c != null && t > startScale
+        if (!useFocal) {
+            if (abs(startScale - t) < 0.001f && abs(startOffset.x) < 0.01f && abs(startOffset.y) < 0.01f) {
+                return
+            }
+        } else {
+            if (abs(startScale - t) < 0.001f) return
+        }
         zoomAnimJob.value?.cancel()
         zoomAnimJob.value = scope.launch {
             val spec = tween<Float>(durationMillis = DoubleTapZoomAnimMs, easing = FastOutSlowInEasing)
@@ -124,10 +140,19 @@ fun FullScreenImageViewer(
                 animationSpec = spec,
             ) { frac, _ ->
                 scale = startScale + (t - startScale) * frac
-                offset = Offset(
-                    x = startOffset.x * (1f - frac),
-                    y = startOffset.y * (1f - frac),
-                )
+                offset = if (useFocal) {
+                    val tap = requireNotNull(doubleTapFocal)
+                    val ctr = requireNotNull(c)
+                    Offset(
+                        x = startOffset.x + (tap.x - ctr.x) * (startScale - scale),
+                        y = startOffset.y + (tap.y - ctr.y) * (startScale - scale),
+                    )
+                } else {
+                    Offset(
+                        x = startOffset.x * (1f - frac),
+                        y = startOffset.y * (1f - frac),
+                    )
+                }
             }
         }
     }
@@ -161,6 +186,7 @@ fun FullScreenImageViewer(
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
                     .fillMaxSize()
+                    .onSizeChanged { layoutSize = it }
                     .sharedBounds(
                         sharedContentState = rememberSharedContentState(key = "detail_image"),
                         animatedVisibilityScope = animatedVisibilityScope,
@@ -184,10 +210,10 @@ fun FullScreenImageViewer(
                     .pointerInput(gesturesEnabled) {
                         if (!gesturesEnabled) return@pointerInput
                         detectTapGestures(
-                            onDoubleTap = {
+                            onDoubleTap = { tapOffset ->
                                 val s = scaleForGestures.value
                                 if (s <= 1.01f) {
-                                    animateZoomTo(DoubleTapZoomScale)
+                                    animateZoomTo(DoubleTapZoomScale, doubleTapFocal = tapOffset)
                                 } else {
                                     animateZoomTo(1f)
                                 }

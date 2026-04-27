@@ -4,6 +4,8 @@ package com.seagazer.aiimage.ui.result
 
 import android.content.Intent
 import androidx.core.content.FileProvider
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -39,6 +41,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -91,18 +94,29 @@ private val DetailImageBoundsTransform = BoundsTransform { _, _ ->
 @Composable
 fun ResultDetailScreen(
     detail: ResultDetail,
+    detailItems: List<ResultDetail> = emptyList(),
+    detailIndex: Int = 0,
     fromGallery: Boolean,
     loadingImage: Boolean,
     onBack: () -> Unit,
-    onSaveToGallery: () -> Boolean,
+    onSaveToGallery: (ResultDetail) -> Boolean,
     onShare: () -> Unit,
-    onExport: () -> Boolean,
-    onDeleteFromGallery: (() -> Unit)? = null,
+    onExport: (ResultDetail) -> Boolean,
+    onDeleteFromGallery: ((ResultDetail) -> Unit)? = null,
     onImageViewerVisibilityChanged: ((Boolean) -> Unit)? = null,
+    onDetailIndexChange: ((Int) -> Unit)? = null,
     isFromPrivateSpace: Boolean = false,
-    onTogglePrivate: (() -> Unit)? = null,
+    onTogglePrivate: ((ResultDetail) -> Unit)? = null,
 ) {
     val context = LocalContext.current
+    val pagerItems = remember(fromGallery, detailItems, detail) {
+        if (fromGallery && detailItems.isNotEmpty()) detailItems else listOf(detail)
+    }
+    val pagerState = rememberPagerState(
+        initialPage = detailIndex.coerceIn(0, pagerItems.lastIndex),
+        pageCount = { pagerItems.size },
+    )
+    val currentDetail = pagerItems.getOrElse(pagerState.currentPage) { detail }
     var saveBanner by remember { mutableStateOf(false) }
     var deleteConfirm by remember { mutableStateOf(false) }
     var showFullScreen by remember { mutableStateOf(false) }
@@ -115,10 +129,21 @@ fun ResultDetailScreen(
             saveBanner = false
         }
     }
+    LaunchedEffect(detailIndex, pagerItems.size) {
+        val targetPage = detailIndex.coerceIn(0, pagerItems.lastIndex)
+        if (targetPage != pagerState.currentPage) {
+            pagerState.scrollToPage(targetPage)
+        }
+    }
+    LaunchedEffect(pagerState, pagerItems.size) {
+        if (pagerItems.isEmpty()) return@LaunchedEffect
+        snapshotFlow { pagerState.settledPage }
+            .collect { page -> onDetailIndexChange?.invoke(page) }
+    }
 
-    fun shareImage() {
-        val file = runCatching { File(URI.create(detail.imageUrl)) }.getOrNull()
-        if (file == null || !file.isFile) return
+    fun shareImage(currentDetail: ResultDetail) {
+        val file = runCatching { File(URI.create(currentDetail.imageUrl)) }.getOrNull() ?: return
+        if (!file.isFile) return
         val authority = "${context.packageName}.fileprovider"
         val contentUri = FileProvider.getUriForFile(context, authority, file)
         val send = Intent(Intent.ACTION_SEND).apply {
@@ -131,8 +156,8 @@ fun ResultDetailScreen(
     }
 
     val fallbackTitle = stringResource(R.string.gallery_page_title)
-    val artifactLabel = remember(detail.prompt, fallbackTitle) {
-        detail.prompt.lineSequence().firstOrNull()?.trim().orEmpty().take(48)
+    val artifactLabel = remember(currentDetail.prompt, fallbackTitle) {
+        currentDetail.prompt.lineSequence().firstOrNull()?.trim().orEmpty().take(48)
             .ifBlank { fallbackTitle }
     }
 
@@ -141,7 +166,7 @@ fun ResultDetailScreen(
         artifactName = artifactLabel,
         onConfirm = {
             deleteConfirm = false
-            onDeleteFromGallery?.invoke()
+            onDeleteFromGallery?.invoke(currentDetail)
         },
         onDismiss = { deleteConfirm = false },
     )
@@ -156,7 +181,7 @@ fun ResultDetailScreen(
         ) { isFullScreen ->
             if (isFullScreen) {
                 FullScreenImageViewer(
-                    imageUrl = detail.imageUrl,
+                    imageUrl = currentDetail.imageUrl,
                     onDismiss = { showFullScreen = false },
                     sharedTransitionScope = this@SharedTransitionLayout,
                     animatedVisibilityScope = this@AnimatedContent,
@@ -164,36 +189,51 @@ fun ResultDetailScreen(
             } else {
                 Column(Modifier.fillMaxSize()) {
                     LumiaTopAppBar(showBack = true, onBack = onBack)
-                    Column(
-                        Modifier
-                            .fillMaxSize()
-                            .verticalScroll(rememberScrollState())
-                            .padding(horizontal = if (fromGallery) 24.dp else 16.dp)
-                            .padding(bottom = 120.dp, top = if (fromGallery) 20.dp else 16.dp),
-                    ) {
-                        if (fromGallery) {
-                            GalleryArtifactContent(
-                                detail = detail,
-                                loadingImage = loadingImage,
-                                onExport = onExport,
-                                onShare = { shareImage() },
-                                onDelete = { deleteConfirm = true },
-                                showDelete = onDeleteFromGallery != null,
-                                onImageClick = { showFullScreen = true },
-                                sharedTransitionScope = this@SharedTransitionLayout,
-                                animatedVisibilityScope = this@AnimatedContent,
-                                isFromPrivateSpace = isFromPrivateSpace,
-                                onTogglePrivate = onTogglePrivate,
-                            )
-                        } else {
+                    if (fromGallery) {
+                        HorizontalPager(
+                            state = pagerState,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 24.dp, vertical = 20.dp),
+                        ) { page ->
+                            val pageDetail = pagerItems[page]
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .verticalScroll(rememberScrollState())
+                                    .padding(bottom = 120.dp),
+                            ) {
+                                GalleryArtifactContent(
+                                    detail = pageDetail,
+                                    loadingImage = loadingImage && page == pagerState.currentPage,
+                                    onExport = { onExport(pageDetail) },
+                                    onShare = { shareImage(pageDetail) },
+                                    onDelete = { deleteConfirm = true },
+                                    showDelete = onDeleteFromGallery != null,
+                                    onImageClick = { showFullScreen = true },
+                                    sharedTransitionScope = this@SharedTransitionLayout,
+                                    animatedVisibilityScope = this@AnimatedContent,
+                                    isFromPrivateSpace = isFromPrivateSpace,
+                                    onTogglePrivate = onTogglePrivate?.let { toggle -> { toggle(pageDetail) } },
+                                )
+                            }
+                        }
+                    } else {
+                        Column(
+                            Modifier
+                                .fillMaxSize()
+                                .verticalScroll(rememberScrollState())
+                                .padding(horizontal = 16.dp)
+                                .padding(bottom = 120.dp, top = 16.dp),
+                        ) {
                             GenerationResultContent(
-                                detail = detail,
+                                detail = currentDetail,
                                 loadingImage = loadingImage,
                                 saveBanner = saveBanner,
                                 onSaveToGallery = {
-                                    if (onSaveToGallery()) saveBanner = true
+                                    if (onSaveToGallery(currentDetail)) saveBanner = true
                                 },
-                                onShare = { shareImage() },
+                                onShare = { shareImage(currentDetail) },
                                 onImageClick = { showFullScreen = true },
                                 sharedTransitionScope = this@SharedTransitionLayout,
                                 animatedVisibilityScope = this@AnimatedContent,
