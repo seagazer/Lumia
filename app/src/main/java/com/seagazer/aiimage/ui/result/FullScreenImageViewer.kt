@@ -62,6 +62,8 @@ private val FullscreenDetailBoundsTransform = BoundsTransform { _, _ ->
 @Composable
 fun FullScreenImageViewer(
     imageUrl: String,
+    /** Must match the detail screen image's [rememberSharedContentState] key for this artifact. */
+    sharedImageTransitionKey: String,
     onDismiss: () -> Unit,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope,
@@ -188,7 +190,7 @@ fun FullScreenImageViewer(
                     .fillMaxSize()
                     .onSizeChanged { layoutSize = it }
                     .sharedBounds(
-                        sharedContentState = rememberSharedContentState(key = "detail_image"),
+                        sharedContentState = rememberSharedContentState(key = sharedImageTransitionKey),
                         animatedVisibilityScope = animatedVisibilityScope,
                         enter = fadeIn(tween(DetailImageSharedTransitionMs)),
                         exit = fadeOut(tween(DetailImageSharedTransitionMs)),

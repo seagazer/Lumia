@@ -45,7 +45,7 @@
     <string name="subscription">Subscription</string>
     <string name="comfy_connection">Server settings</string>
     <string name="base_url">Base URL</string>
-    <string name="base_url_hint">Use your PC IPv4 from ipconfig, e.g. http://192.168.1.105:8188. Default 192.168.1.1 is often the router, not ComfyUI. Android Emulator on the same PC: http://10.0.2.2:8188. Start ComfyUI with --listen so LAN devices can connect.</string>
+    <string name="base_url_hint">Use your PC IPv4 from ipconfig, e.g. http://192.168.1.105:8188. Android Emulator on the same PC: http://10.0.2.2:8188. Start ComfyUI with --listen so LAN devices can connect. Leave empty until your ComfyUI server address is ready.</string>
     <string name="checkpoint_file">UNET / checkpoint file</string>
     <string name="checkpoint_file_hint">Qwen FP8 workflow (bundled): exact filename for UNETLoader, usually under models/diffusion_models. SD1.5 workflow: checkpoint under models/checkpoints. Leave empty to use the JSON template default.</string>
     <string name="clip_file">CLIP file (optional)</string>

@@ -87,6 +87,8 @@ import androidx.compose.animation.togetherWith
 
 private const val DetailImageSharedTransitionMs = 280
 
+private fun detailImageSharedTransitionKey(detailId: String) = "detail_image_$detailId"
+
 private val DetailImageBoundsTransform = BoundsTransform { _, _ ->
     tween(DetailImageSharedTransitionMs, easing = FastOutSlowInEasing)
 }
@@ -182,6 +184,7 @@ fun ResultDetailScreen(
             if (isFullScreen) {
                 FullScreenImageViewer(
                     imageUrl = currentDetail.imageUrl,
+                    sharedImageTransitionKey = detailImageSharedTransitionKey(currentDetail.id),
                     onDismiss = { showFullScreen = false },
                     sharedTransitionScope = this@SharedTransitionLayout,
                     animatedVisibilityScope = this@AnimatedContent,
@@ -192,16 +195,15 @@ fun ResultDetailScreen(
                     if (fromGallery) {
                         HorizontalPager(
                             state = pagerState,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(horizontal = 24.dp, vertical = 20.dp),
+                            modifier = Modifier.fillMaxSize(),
                         ) { page ->
                             val pageDetail = pagerItems[page]
                             Column(
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .verticalScroll(rememberScrollState())
-                                    .padding(bottom = 120.dp),
+                                    .padding(horizontal = 24.dp)
+                                    .padding(top = 20.dp, bottom = 120.dp),
                             ) {
                                 GalleryArtifactContent(
                                     detail = pageDetail,
@@ -291,7 +293,9 @@ private fun GalleryArtifactContent(
                     modifier = Modifier
                         .fillMaxSize()
                         .sharedBounds(
-                            sharedContentState = rememberSharedContentState(key = "detail_image"),
+                            sharedContentState = rememberSharedContentState(
+                                key = detailImageSharedTransitionKey(detail.id),
+                            ),
                             animatedVisibilityScope = animatedVisibilityScope,
                             enter = fadeIn(tween(DetailImageSharedTransitionMs)),
                             exit = fadeOut(tween(DetailImageSharedTransitionMs)),
@@ -566,7 +570,9 @@ private fun GenerationResultContent(
                 modifier = Modifier
                     .fillMaxSize()
                     .sharedBounds(
-                        sharedContentState = rememberSharedContentState(key = "detail_image"),
+                        sharedContentState = rememberSharedContentState(
+                            key = detailImageSharedTransitionKey(detail.id),
+                        ),
                         animatedVisibilityScope = animatedVisibilityScope,
                         enter = fadeIn(tween(DetailImageSharedTransitionMs)),
                         exit = fadeOut(tween(DetailImageSharedTransitionMs)),

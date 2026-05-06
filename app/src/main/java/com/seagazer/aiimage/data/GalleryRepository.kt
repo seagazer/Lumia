@@ -1,6 +1,7 @@
 package com.seagazer.aiimage.data
 
 import android.content.Context
+import android.util.Log
 import com.seagazer.aiimage.data.local.AppPreferences
 import com.seagazer.aiimage.domain.GalleryItem
 import com.seagazer.aiimage.util.AppGalleryStorage
@@ -44,12 +45,21 @@ class GalleryRepository(private val context: Context) {
         }
     }
 
-    fun clearAll() {
-        AppGalleryStorage.directory(context).deleteRecursively()
-        File(context.cacheDir, "comfy_out").deleteRecursively()
+    fun clearAll(): Boolean {
+        val galleryDeleted = deleteDirectoryIfExists(AppGalleryStorage.directory(context))
+        val cacheDeleted = deleteDirectoryIfExists(File(context.cacheDir, "comfy_out"))
+        if (!galleryDeleted || !cacheDeleted) {
+            Log.w(TAG, "Failed to clear all local image data. galleryDeleted=$galleryDeleted cacheDeleted=$cacheDeleted")
+            return false
+        }
         AppPreferences.saveGallery(context, emptyList())
         AppPreferences.saveRecycleBin(context, emptyList())
         AppPreferences.savePrivateSpace(context, emptyList())
+        return true
+    }
+
+    private fun deleteDirectoryIfExists(dir: File): Boolean {
+        return !dir.exists() || dir.deleteRecursively()
     }
 
     private fun moveFile(item: GalleryItem, destDir: File): GalleryItem {
@@ -57,14 +67,30 @@ class GalleryRepository(private val context: Context) {
         val src = runCatching { File(URI.create(item.imageUrl)) }.getOrNull() ?: return item
         if (!src.isFile) return item
         val dest = File(destDir, "${item.id}.png")
-        if (dest.exists()) dest.delete()
-        if (!src.renameTo(dest)) {
-            runCatching {
-                src.copyTo(dest, overwrite = true)
-                src.delete()
-            }
+        if (src.absolutePath == dest.absolutePath) return item
+        if (dest.exists() && !dest.delete()) {
+            Log.w(TAG, "Failed to replace existing image: ${dest.absolutePath}")
+            return item
         }
-        return item.copy(imageUrl = dest.toURI().toString())
+        val moved = src.renameTo(dest) || runCatching {
+            src.copyTo(dest, overwrite = true)
+            if (!dest.isFile || dest.length() <= 0L) return@runCatching false
+            if (!src.delete()) Log.w(TAG, "Copied image but failed to delete source: ${src.absolutePath}")
+            true
+        }.getOrElse {
+            Log.w(TAG, "Failed to copy image to ${dest.absolutePath}", it)
+            false
+        }
+        return if (moved && dest.isFile) {
+            item.copy(imageUrl = dest.toURI().toString())
+        } else {
+            Log.w(TAG, "Image move failed, keeping original URI: ${item.id}")
+            item
+        }
+    }
+
+    companion object {
+        private const val TAG = "GalleryRepository"
     }
 
     private fun filterReachable(items: List<GalleryItem>): List<GalleryItem> =

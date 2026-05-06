@@ -46,7 +46,7 @@
     <string name="subscription">订阅</string>
     <string name="comfy_connection">服务器设置</string>
     <string name="base_url">基础地址</string>
-    <string name="base_url_hint">使用本机 IPv4（ipconfig），例如 http://192.168.1.105:8188。默认 192.168.1.1 多为路由器而非 ComfyUI。安卓模拟器访问本机：http://10.0.2.2:8188。请用 --listen 启动 ComfyUI 以便局域网连接。</string>
+    <string name="base_url_hint">使用本机 IPv4（ipconfig），例如 http://192.168.1.105:8188。安卓模拟器访问本机：http://10.0.2.2:8188。请用 --listen 启动 ComfyUI 以便局域网连接。未准备好 ComfyUI 地址时可先留空。</string>
     <string name="checkpoint_file">UNET / 模型文件</string>
     <string name="checkpoint_file_hint">Qwen FP8 工作流（内置）：UNETLoader 的准确文件名，通常在 models/diffusion_models。SD1.5：放在 models/checkpoints。留空则使用 JSON 模板默认值。</string>
     <string name="clip_file">CLIP 文件（可选）</string>

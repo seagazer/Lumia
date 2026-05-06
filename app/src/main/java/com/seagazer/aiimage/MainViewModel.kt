@@ -248,11 +248,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }.getOrDefault(false)
     }
 
-    fun clearAppCaches() {
-        galleryRepo.clearAll()
-        _gallery.value = emptyList()
-        _recycleBin.value = emptyList()
-        _privateSpace.value = emptyList()
+    fun clearAppCaches(): Boolean {
+        val cleared = galleryRepo.clearAll()
+        if (cleared) {
+            _gallery.value = emptyList()
+            _recycleBin.value = emptyList()
+            _privateSpace.value = emptyList()
+        }
+        return cleared
     }
 
     fun showNetworkError(value: Boolean) {
@@ -404,11 +407,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val text = _prompt.value.trim()
         if (text.isEmpty() || _generating.value) return
         val app = getApplication<Application>()
-        if (!AppPreferences.tryBeginGeneration(app)) {
+        if (!AppPreferences.canRecordGeneration(app)) {
             _dailyLimitExceeded.tryEmit(Unit)
             return
         }
-        _dailyGenerationsUsed.value = AppPreferences.getTodayGenerationCount(app)
         generationJob?.cancel()
         generationJob = viewModelScope.launch {
             try {
@@ -475,6 +477,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                                 listOf(newItem) + list
                             }
                             persistGallery()
+                            AppPreferences.recordSuccessfulGeneration(app)
+                            _dailyGenerationsUsed.value = AppPreferences.getTodayGenerationCount(app)
                         }
                         onDone(detail)
                     }

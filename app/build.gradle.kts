@@ -30,7 +30,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            buildConfigField("String", "DEFAULT_COMFY_BASE_URL", "\"http://192.168.1.1:8188\"")
+            buildConfigField("String", "DEFAULT_COMFY_BASE_URL", "\"\"")
         }
     }
     compileOptions {

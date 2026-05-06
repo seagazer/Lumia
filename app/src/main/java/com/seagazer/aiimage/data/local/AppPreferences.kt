@@ -8,7 +8,11 @@ import com.seagazer.aiimage.domain.ImageQuality
 import org.json.JSONArray
 import org.json.JSONObject
 import java.security.MessageDigest
+import java.security.SecureRandom
 import java.time.LocalDate
+import java.util.Base64
+import javax.crypto.SecretKeyFactory
+import javax.crypto.spec.PBEKeySpec
 
 object AppPreferences {
 
@@ -30,7 +34,14 @@ object AppPreferences {
     private const val KEY_PRIVATE_PASSWORD = "private_space_password"
     private const val KEY_APP_LANGUAGE = "app_language_v1"
 
-    /** TODO: Max ComfyUI generation requests per calendar day (each request counts once). */
+    private const val PASSWORD_HASH_PREFIX = "pbkdf2_sha256"
+    private const val PASSWORD_HASH_SEPARATOR = "$"
+    private const val PASSWORD_PBKDF2_ALGORITHM = "PBKDF2WithHmacSHA256"
+    private const val PASSWORD_PBKDF2_ITERATIONS = 120_000
+    private const val PASSWORD_SALT_BYTES = 16
+    private const val PASSWORD_HASH_BITS = 256
+
+    /** Max successful ComfyUI generations per calendar day. */
     const val MAX_DAILY_GENERATIONS = 500
 
     private val dailyGenLock = Any()
@@ -157,10 +168,17 @@ object AppPreferences {
     }
 
     /**
-     * Reserves one generation slot for today if under [MAX_DAILY_GENERATIONS].
+     * Checks whether another successful generation can be recorded today.
+     */
+    fun canRecordGeneration(ctx: Context): Boolean = synchronized(dailyGenLock) {
+        getTodayGenerationCount(ctx) < MAX_DAILY_GENERATIONS
+    }
+
+    /**
+     * Records one successful generation for today if under [MAX_DAILY_GENERATIONS].
      * @return false if today’s limit is already reached (no increment).
      */
-    fun tryBeginGeneration(ctx: Context): Boolean = synchronized(dailyGenLock) {
+    fun recordSuccessfulGeneration(ctx: Context): Boolean = synchronized(dailyGenLock) {
         val prefs = sp(ctx)
         val today = LocalDate.now().toString()
         val storedDate = prefs.getString(KEY_DAILY_GEN_DATE, null)
@@ -184,17 +202,56 @@ object AppPreferences {
 
     fun verifyPrivatePassword(ctx: Context, password: String): Boolean {
         val storedHash = sp(ctx).getString(KEY_PRIVATE_PASSWORD, null) ?: return false
-        return hashPassword(password) == storedHash
+        val verified = if (storedHash.startsWith(PASSWORD_HASH_PREFIX)) {
+            verifyPbkdf2Password(password, storedHash)
+        } else {
+            hashPasswordSha256(password) == storedHash
+        }
+        if (verified && !storedHash.startsWith(PASSWORD_HASH_PREFIX)) {
+            savePrivatePassword(ctx, password)
+        }
+        return verified
     }
 
     fun savePrivatePassword(ctx: Context, password: String) {
-        sp(ctx).edit().putString(KEY_PRIVATE_PASSWORD, hashPassword(password)).apply()
+        sp(ctx).edit().putString(KEY_PRIVATE_PASSWORD, hashPasswordPbkdf2(password)).apply()
     }
 
     fun isPrivatePasswordSet(ctx: Context): Boolean =
         !sp(ctx).getString(KEY_PRIVATE_PASSWORD, null).isNullOrEmpty()
 
-    private fun hashPassword(password: String): String {
+    private fun hashPasswordPbkdf2(password: String): String {
+        val salt = ByteArray(PASSWORD_SALT_BYTES)
+        SecureRandom().nextBytes(salt)
+        val hash = pbkdf2(password, salt)
+        return listOf(
+            PASSWORD_HASH_PREFIX,
+            PASSWORD_PBKDF2_ITERATIONS.toString(),
+            Base64.getEncoder().encodeToString(salt),
+            Base64.getEncoder().encodeToString(hash),
+        ).joinToString(PASSWORD_HASH_SEPARATOR)
+    }
+
+    private fun verifyPbkdf2Password(password: String, encoded: String): Boolean {
+        val parts = encoded.split(PASSWORD_HASH_SEPARATOR)
+        if (parts.size != 4 || parts[0] != PASSWORD_HASH_PREFIX) return false
+        val iterations = parts[1].toIntOrNull() ?: return false
+        val salt = runCatching { Base64.getDecoder().decode(parts[2]) }.getOrNull() ?: return false
+        val expected = runCatching { Base64.getDecoder().decode(parts[3]) }.getOrNull() ?: return false
+        val actual = pbkdf2(password, salt, iterations)
+        return MessageDigest.isEqual(actual, expected)
+    }
+
+    private fun pbkdf2(
+        password: String,
+        salt: ByteArray,
+        iterations: Int = PASSWORD_PBKDF2_ITERATIONS,
+    ): ByteArray {
+        val spec = PBEKeySpec(password.toCharArray(), salt, iterations, PASSWORD_HASH_BITS)
+        return SecretKeyFactory.getInstance(PASSWORD_PBKDF2_ALGORITHM).generateSecret(spec).encoded
+    }
+
+    private fun hashPasswordSha256(password: String): String {
         val digest = MessageDigest.getInstance("SHA-256")
         val hashBytes = digest.digest(password.toByteArray(Charsets.UTF_8))
         return hashBytes.joinToString("") { "%02x".format(it) }
